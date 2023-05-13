@@ -4,6 +4,8 @@
 #![no_std]
 #![no_main]
 
+mod driver;
+
 use bsp::entry;
 use defmt::*;
 use defmt_rtt as _;
@@ -21,6 +23,8 @@ use bsp::hal::{
     sio::Sio,
     watchdog::Watchdog,
 };
+
+use crate::driver::{Display, DriveDirection};
 
 #[entry]
 fn main() -> ! {
@@ -60,14 +64,86 @@ fn main() -> ! {
     // LED to one of the GPIO pins, and reference that pin here.
     let mut led_pin = pins.led.into_push_pull_output();
 
-    loop {
-        info!("on!");
-        led_pin.set_high().unwrap();
-        delay.delay_ms(500);
-        info!("off!");
-        led_pin.set_low().unwrap();
-        delay.delay_ms(500);
-    }
-}
+    // pins for the display driver
+    let mut driver_pins = driver::Pins {
+        row_address: [
+            &mut pins.gpio2.into_push_pull_output(),
+            &mut pins.gpio3.into_push_pull_output(),
+            &mut pins.gpio4.into_push_pull_output(),
+            &mut pins.gpio5.into_push_pull_output(),
+            &mut pins.gpio6.into_push_pull_output(),
+        ],
+        row_high_en: &mut pins.gpio7.into_push_pull_output(),
+        row_low_en: &mut pins.gpio8.into_push_pull_output(),
+        col_address: [
+            &mut pins.gpio9.into_push_pull_output(),
+            &mut pins.gpio10.into_push_pull_output(),
+            &mut pins.gpio11.into_push_pull_output(),
+            &mut pins.gpio12.into_push_pull_output(),
+            &mut pins.gpio13.into_push_pull_output(),
+        ],
+        col_high_low: &mut pins.gpio14.into_push_pull_output(),
+        col_select: &mut [
+            &mut pins.gpio16.into_push_pull_output(),
+            &mut pins.gpio17.into_push_pull_output(),
+        ],
+    };
 
-// End of file
+    let mut display = Display::<16, 42>::new(driver_pins);
+
+    display.clear();
+    display.refresh(&mut delay, true);
+
+    // let range = 0..35;
+
+    // for i in range.clone() {
+    //     // debug!("Low: {}", i);
+    //     driver_pins.drive_pixel(1, i, DriveDirection::Low, &mut delay, 2000);
+    // }
+    // delay.delay_ms(1000);
+
+    let mut t = 0;
+
+    loop {
+        display.clear();
+
+        for row in 0..10 {
+            for i in t..t + 3 {
+                display.set_pixel(row, (row + i) % 42, true);
+            }
+        }
+
+        display.refresh(&mut delay, false);
+
+        delay.delay_ms(50);
+        t += 1;
+    }
+    // loop {
+    //     info!("on!");
+    //     led_pin.set_high().unwrap();
+
+    //     // for i in range.clone() {
+    //     //     debug!("High: {}", i);
+    //     //     driver_pins.drive_pixel(1, i, DriveDirection::High, &mut delay, 2000);
+    //     //     delay.delay_ms(100);
+    //     // }
+    //     display.set_pixel(1, 1, true);
+    //     display.refresh(&mut delay, false);
+
+    //     delay.delay_ms(1000);
+
+    //     info!("off!");
+    //     led_pin.set_low().unwrap();
+
+    //     // for i in range.clone() {
+    //     //     debug!("Low: {}", i);
+    //     //     driver_pins.drive_pixel(1, i, DriveDirection::Low, &mut delay, 2000);
+    //     //     delay.delay_ms(100);
+    //     // }
+
+    //     display.set_pixel(1, 1, false);
+    //     display.refresh(&mut delay, false);
+
+    //     delay.delay_ms(1000);
+    // }
+}
