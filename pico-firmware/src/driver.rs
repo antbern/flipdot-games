@@ -141,6 +141,24 @@ pub struct Display<'a, const ROWS: usize, const COLS: usize> {
     buffer_active: [[bool; COLS]; ROWS],
 }
 
+impl<'a, const ROWS: usize, const COLS: usize> common::display::PixelDisplay
+    for Display<'a, ROWS, COLS>
+{
+    const ROWS: usize = ROWS;
+    const COLUMNS: usize = COLS;
+
+    fn set_pixel(&mut self, row: usize, col: usize, value: common::display::Pixel) {
+        self.set_pixel(
+            row,
+            col,
+            match value {
+                common::display::Pixel::On => true,
+                common::display::Pixel::Off => false,
+            },
+        )
+    }
+}
+
 impl<'a, const ROWS: usize, const COLS: usize> Display<'a, ROWS, COLS> {
     pub fn new(pins: Pins<'a>) -> Self {
         assert!(ROWS <= ROW_DRIVER_ROWS as usize);

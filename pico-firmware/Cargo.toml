@@ -25,6 +25,8 @@ rp-pico = "0.7"
 # rp2040-hal = { version="0.8", features=["rt", "critical-section-impl"] }
 # rp2040-boot2 = "0.2"
 
+common = {path = '../common'}
+
 # cargo build/run
 [profile.dev]
 codegen-units = 1

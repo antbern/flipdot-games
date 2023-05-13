@@ -24,7 +24,7 @@ use bsp::hal::{
     watchdog::Watchdog,
 };
 
-use crate::driver::{Display, DriveDirection};
+use crate::driver::Display;
 
 #[entry]
 fn main() -> ! {
@@ -65,7 +65,7 @@ fn main() -> ! {
     let mut led_pin = pins.led.into_push_pull_output();
 
     // pins for the display driver
-    let mut driver_pins = driver::Pins {
+    let driver_pins = driver::Pins {
         row_address: [
             &mut pins.gpio2.into_push_pull_output(),
             &mut pins.gpio3.into_push_pull_output(),
