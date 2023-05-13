@@ -76,11 +76,11 @@ fn main() -> ! {
         row_high_en: &mut pins.gpio7.into_push_pull_output(),
         row_low_en: &mut pins.gpio8.into_push_pull_output(),
         col_address: [
-            &mut pins.gpio9.into_push_pull_output(),
-            &mut pins.gpio10.into_push_pull_output(),
-            &mut pins.gpio11.into_push_pull_output(),
-            &mut pins.gpio12.into_push_pull_output(),
-            &mut pins.gpio13.into_push_pull_output(),
+            &mut pins.gpio9.into_push_pull_output(),  // 13
+            &mut pins.gpio10.into_push_pull_output(), // 14
+            &mut pins.gpio11.into_push_pull_output(), // 15
+            &mut pins.gpio12.into_push_pull_output(), // 16
+            &mut pins.gpio13.into_push_pull_output(), // 17
         ],
         col_high_low: &mut pins.gpio14.into_push_pull_output(),
         col_select: &mut [
@@ -91,8 +91,11 @@ fn main() -> ! {
 
     let mut display = Display::<16, 42>::new(driver_pins);
 
+    led_pin.set_high().unwrap();
+
     display.clear();
     display.refresh(&mut delay, true);
+    led_pin.set_low().unwrap();
 
     // let range = 0..35;
 
@@ -107,15 +110,17 @@ fn main() -> ! {
     loop {
         display.clear();
 
-        for row in 0..10 {
-            for i in t..t + 3 {
-                display.set_pixel(row, (row + i) % 42, true);
-            }
-        }
+        // for row in 0..16 {
+        //     for i in t..t + 3 {
+        //         display.set_pixel(row, (row + i) % 42, true);
+        //     }
+        // }
+
+        display.fill((t % 2 == 0));
 
         display.refresh(&mut delay, false);
 
-        delay.delay_ms(50);
+        delay.delay_ms(500);
         t += 1;
     }
     // loop {

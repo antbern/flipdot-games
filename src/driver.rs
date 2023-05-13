@@ -154,9 +154,13 @@ impl<'a, const ROWS: usize, const COLS: usize> Display<'a, ROWS, COLS> {
     }
 
     pub fn clear(&mut self) {
+        self.fill(false);
+    }
+
+    pub fn fill(&mut self, value: bool) {
         for row in 0..ROWS {
             for col in 0..COLS {
-                self.buffer_active[row][col] = false;
+                self.buffer_active[row][col] = value;
             }
         }
     }
