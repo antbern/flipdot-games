@@ -34,7 +34,8 @@ impl<'a> Pins<'a> {
         debug_assert!(row < 16); // the lookup table only supports 16 rows for now, although more are supported in hardware
 
         // define a lookup table that gives a bus address for each row index
-        let lookup = [1, 4, 5, 2, 3, 6, 7, 9, 12, 13, 10, 11, 14, 15, 17, 20];
+        let lookup: [_; ROW_DRIVER_ROWS as usize] =
+            [1, 4, 5, 2, 3, 6, 7, 9, 12, 13, 10, 11, 14, 15, 17, 20];
 
         let address = lookup[row as usize];
 
