@@ -21,4 +21,11 @@ pub trait PixelDisplay {
             }
         }
     }
+
+    fn rows(&self) -> usize {
+        Self::ROWS
+    }
+    fn columns(&self) -> usize {
+        Self::COLUMNS
+    }
 }
