@@ -6,15 +6,17 @@ use std::fmt::Display;
 use std::io::{self, stdout};
 
 use common::display::{Pixel, PixelDisplay};
-use crossterm::cursor;
+use common::{Game, Input, TickerGame};
 use crossterm::event::{
-    poll, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags, PushKeyboardEnhancementFlags,
+    poll, KeyEventKind, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags,
+    PushKeyboardEnhancementFlags,
 };
 use crossterm::style::{Color, Print, SetForegroundColor};
-use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
+use crossterm::terminal::{Clear, EnterAlternateScreen, LeaveAlternateScreen};
+use crossterm::{cursor, terminal};
 use crossterm::{
     cursor::position,
-    event::{read, EnableBracketedPaste, Event, KeyCode},
+    event::{read, Event, KeyCode},
     execute, queue,
     terminal::{disable_raw_mode, enable_raw_mode},
 };
@@ -40,7 +42,14 @@ impl<const ROWS: usize, const COLS: usize> ConsoleDisplay<ROWS, COLS> {
 
 impl<const ROWS: usize, const COLS: usize> Display for ConsoleDisplay<ROWS, COLS> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "┏")?;
+        for _ in 0..COLS {
+            write!(f, "━")?;
+        }
+        write!(f, "┓\n\r")?;
+
         for row in (0..ROWS).step_by(2) {
+            write!(f, "┃")?;
             for col in 0..COLS {
                 write!(
                     f,
@@ -53,8 +62,13 @@ impl<const ROWS: usize, const COLS: usize> Display for ConsoleDisplay<ROWS, COLS
                     }
                 )?;
             }
-            write!(f, "\n\r")?;
+            write!(f, "┃\n\r")?;
         }
+        write!(f, "┗")?;
+        for _ in 0..COLS {
+            write!(f, "━")?;
+        }
+        write!(f, "┛\n\r")?;
 
         Ok(())
     }
@@ -71,6 +85,9 @@ impl<const ROWS: usize, const COLS: usize> PixelDisplay for ConsoleDisplay<ROWS,
 
 fn print_events() -> io::Result<()> {
     let mut d: ConsoleDisplay<16, 42> = ConsoleDisplay::new();
+    let mut i = Input::default();
+
+    let mut game = TickerGame::new();
 
     let mut last_frame_time = Instant::now();
     loop {
@@ -79,76 +96,43 @@ fn print_events() -> io::Result<()> {
             // It's guaranteed that read() won't block if `poll` returns `Ok(true)`
             let event = read()?;
 
-            println!("Event::{:?}\r", event);
-
-            if event == Event::Key(KeyCode::Char('c').into()) {
-                println!("Cursor position: {:?}\r", position());
-            }
-
             if let Event::Key(ke) = event {
-                match ke.code {
-                    KeyCode::Char('w') => d.fill(Pixel::On),
-                    KeyCode::Char('s') => d.fill(Pixel::Off),
-                    KeyCode::Char('a') => {
-                        d.fill(Pixel::Off);
+                match (ke.code, ke.kind) {
+                    (KeyCode::Char('w'), KeyEventKind::Press) => i.up = true,
+                    (KeyCode::Char('a'), KeyEventKind::Press) => i.up = true,
+                    (KeyCode::Char('s'), KeyEventKind::Press) => i.up = true,
+                    (KeyCode::Char('d'), KeyEventKind::Press) => i.up = true,
+                    (KeyCode::Char('w'), KeyEventKind::Release) => i.up = false,
+                    (KeyCode::Char('a'), KeyEventKind::Release) => i.up = false,
+                    (KeyCode::Char('s'), KeyEventKind::Release) => i.up = false,
+                    (KeyCode::Char('d'), KeyEventKind::Release) => i.up = false,
 
-                        for row in (0..d.rows()).step_by(2) {
-                            for col in (0..d.columns()).step_by(2) {
-                                d.set_pixel(row, col, Pixel::On)
-                            }
-                        }
-                    }
-                    KeyCode::Char('d') => {
-                        d.fill(Pixel::On);
-
-                        for row in (0..d.rows()).step_by(2) {
-                            for col in (0..d.columns()).step_by(2) {
-                                d.set_pixel(row, col, Pixel::Off)
-                            }
-                        }
-                    }
-                    KeyCode::Char('e') => {
-                        d.fill(Pixel::Off);
-
-                        for row in 0..d.rows() {
-                            for col in 0..d.columns() {
-                                if (row + col) % 2 == 0 {
-                                    d.set_pixel(row, col, Pixel::On)
-                                }
-                            }
-                        }
-                    }
-                    KeyCode::Char('q') => {
-                        d.fill(Pixel::Off);
-
-                        for row in 0..d.rows() {
-                            for col in 0..d.columns() {
-                                if (row + col) % 2 == 1 {
-                                    d.set_pixel(row, col, Pixel::On)
-                                }
-                            }
-                        }
-                    }
-                    KeyCode::Esc => break,
+                    (KeyCode::Esc, _) => break,
                     _ => {}
                 }
             }
         }
 
         let current_time = Instant::now();
+        let elapsed = current_time - last_frame_time;
 
-        if (current_time - last_frame_time) > Duration::from_millis(100) {
+        if elapsed > Duration::from_millis(10) {
             last_frame_time = current_time;
 
-            // refresh the screen
+            // refresh the screen if the game did an update
 
-            execute!(
-                stdout(),
-                cursor::MoveTo(0, 0),
-                SetForegroundColor(Color::Yellow),
-                Print(&d),
-                SetForegroundColor(Color::White)
-            )?;
+            if game.update(elapsed, i, &mut d) {
+                execute!(
+                    stdout(),
+                    terminal::BeginSynchronizedUpdate,
+                    Clear(crossterm::terminal::ClearType::All),
+                    cursor::MoveTo(0, 0),
+                    SetForegroundColor(Color::Yellow),
+                    Print(&d),
+                    SetForegroundColor(Color::White),
+                    terminal::EndSynchronizedUpdate
+                )?;
+            }
         }
     }
 
@@ -167,7 +151,9 @@ fn main() -> io::Result<()> {
         Ok(true)
     );
 
+    execute!(stdout, EnterAlternateScreen)?;
     if supports_keyboard_enhancement {
+        println!("Enabling Keyboard Enhancement");
         queue!(
             stdout,
             PushKeyboardEnhancementFlags(
@@ -179,17 +165,14 @@ fn main() -> io::Result<()> {
         )?;
     }
 
-    execute!(stdout, EnableBracketedPaste, EnterAlternateScreen)?;
-
     if let Err(e) = print_events() {
         println!("Error: {:?}\r", e);
     }
 
     if supports_keyboard_enhancement {
-        queue!(stdout, PopKeyboardEnhancementFlags)?;
+        execute!(stdout, PopKeyboardEnhancementFlags)?;
     }
-
-    execute!(stdout, PopKeyboardEnhancementFlags, LeaveAlternateScreen)?;
+    execute!(stdout, LeaveAlternateScreen)?;
 
     disable_raw_mode()
 }
