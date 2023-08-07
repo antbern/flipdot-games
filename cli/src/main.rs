@@ -6,7 +6,8 @@ use std::fmt::Display;
 use std::io::{self, stdout};
 
 use common::display::{Pixel, PixelDisplay};
-use common::{Game, Input, TickerGame};
+use common::snake::SnakeGame;
+use common::{Game, Input, RandomNumberSource, TickerGame};
 use crossterm::event::{
     poll, KeyEventKind, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags,
     PushKeyboardEnhancementFlags,
@@ -15,11 +16,11 @@ use crossterm::style::{Color, Print, SetForegroundColor};
 use crossterm::terminal::{Clear, EnterAlternateScreen, LeaveAlternateScreen};
 use crossterm::{cursor, terminal};
 use crossterm::{
-    cursor::position,
     event::{read, Event, KeyCode},
     execute, queue,
     terminal::{disable_raw_mode, enable_raw_mode},
 };
+use rand::prelude::*;
 use std::time::{Duration, Instant};
 
 const HELP: &str = r#"Blocking read()
@@ -83,11 +84,22 @@ impl<const ROWS: usize, const COLS: usize> PixelDisplay for ConsoleDisplay<ROWS,
     }
 }
 
+struct Random {
+    rng: ThreadRng,
+}
+
+impl RandomNumberSource for Random {
+    fn next_u32(&mut self) -> u32 {
+        self.rng.gen()
+    }
+}
 fn print_events() -> io::Result<()> {
     let mut d: ConsoleDisplay<16, 42> = ConsoleDisplay::new();
     let mut i = Input::default();
+    let mut rng = Random { rng: thread_rng() };
 
-    let mut game = TickerGame::new();
+    //let mut game = TickerGame::new();
+    let mut game: SnakeGame<16, 42> = SnakeGame::new();
 
     let mut last_frame_time = Instant::now();
     loop {
@@ -99,13 +111,15 @@ fn print_events() -> io::Result<()> {
             if let Event::Key(ke) = event {
                 match (ke.code, ke.kind) {
                     (KeyCode::Char('w'), KeyEventKind::Press) => i.up = true,
-                    (KeyCode::Char('a'), KeyEventKind::Press) => i.up = true,
-                    (KeyCode::Char('s'), KeyEventKind::Press) => i.up = true,
-                    (KeyCode::Char('d'), KeyEventKind::Press) => i.up = true,
+                    (KeyCode::Char('a'), KeyEventKind::Press) => i.left = true,
+                    (KeyCode::Char('s'), KeyEventKind::Press) => i.down = true,
+                    (KeyCode::Char('d'), KeyEventKind::Press) => i.right = true,
                     (KeyCode::Char('w'), KeyEventKind::Release) => i.up = false,
-                    (KeyCode::Char('a'), KeyEventKind::Release) => i.up = false,
-                    (KeyCode::Char('s'), KeyEventKind::Release) => i.up = false,
-                    (KeyCode::Char('d'), KeyEventKind::Release) => i.up = false,
+                    (KeyCode::Char('a'), KeyEventKind::Release) => i.left = false,
+                    (KeyCode::Char('s'), KeyEventKind::Release) => i.down = false,
+                    (KeyCode::Char('d'), KeyEventKind::Release) => i.right = false,
+                    (KeyCode::Char(' '), KeyEventKind::Press) => i.action = true,
+                    (KeyCode::Char(' '), KeyEventKind::Release) => i.action = false,
 
                     (KeyCode::Esc, _) => break,
                     _ => {}
@@ -121,7 +135,7 @@ fn print_events() -> io::Result<()> {
 
             // refresh the screen if the game did an update
 
-            if game.update(elapsed, i, &mut d) {
+            if game.update(elapsed, i, &mut d, &mut rng) {
                 execute!(
                     stdout(),
                     terminal::BeginSynchronizedUpdate,
