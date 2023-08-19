@@ -48,6 +48,18 @@ impl Direction {
             Direction::Right => 0,
         }
     }
+
+    fn is_opposite_to(&self, direction: Direction) -> bool {
+        use Direction::*;
+
+        match (*self, direction) {
+            (Up, Down) => true,
+            (Down, Up) => true,
+            (Left, Right) => true,
+            (Right, Left) => true,
+            _ => false,
+        }
+    }
 }
 
 impl<const ROWS: usize, const COLS: usize> SnakeGame<ROWS, COLS> {
@@ -98,13 +110,17 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
 
         self.update_timer += elapsed;
 
-        self.direction = match input {
+        let new_direction = match input {
             Input { left: true, .. } => Direction::Left,
             Input { right: true, .. } => Direction::Right,
             Input { up: true, .. } => Direction::Up,
             Input { down: true, .. } => Direction::Down,
             _ => self.direction,
         };
+
+        if !new_direction.is_opposite_to(self.direction) {
+            self.direction = new_direction;
+        }
 
         // spawn apple in random position (not on snake itself) if unspecified
         if self.apple_position_x < 0 {
