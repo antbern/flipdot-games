@@ -6,16 +6,23 @@
 
 mod driver;
 
+use core::time::Duration;
+
 use bsp::entry;
 use defmt::*;
 use defmt_rtt as _;
-use embedded_hal::digital::v2::OutputPin;
+use embedded_hal::digital::v2::{InputPin, OutputPin};
 use panic_probe as _;
 
 // Provide an alias for our BSP so we can switch targets quickly.
 // Uncomment the BSP you included in Cargo.toml, the rest of the code does not need to change.
 use rp_pico as bsp;
 // use sparkfun_pro_micro_rp2040 as bsp;
+use common::{
+    display::{Pixel, PixelDisplay},
+    snake::SnakeGame,
+    Game, RandomNumberSource,
+};
 
 use bsp::hal::{
     clocks::{init_clocks_and_plls, Clock},
@@ -92,63 +99,65 @@ fn main() -> ! {
     let mut display = Display::<16, 42>::new(driver_pins);
 
     led_pin.set_high().unwrap();
+    // do a deep screen refresh (to make sure all pixels are really off)
+    display.clear();
+    display.fill(true);
+    display.refresh(&mut delay, true);
 
     display.clear();
     display.refresh(&mut delay, true);
+    display.refresh(&mut delay, true);
+
     led_pin.set_low().unwrap();
 
-    // let range = 0..35;
+    let mut game: SnakeGame<16, 42> = SnakeGame::new();
 
-    // for i in range.clone() {
-    //     // debug!("Low: {}", i);
-    //     driver_pins.drive_pixel(1, i, DriveDirection::Low, &mut delay, 2000);
-    // }
-    // delay.delay_ms(1000);
+    let input_up = pins.gpio28.into_pull_up_input();
+    let input_down = pins.gpio27.into_pull_up_input();
+    let input_left = pins.gpio26.into_pull_up_input();
+    let input_right = pins.gpio22.into_pull_up_input();
+    let input_action = pins.gpio21.into_pull_up_input();
 
-    let mut t = 0;
-
+    let mut rng = RandomSource::default();
     loop {
-        display.clear();
+        // tick every 10ms
+        delay.delay_ms(10);
 
-        // for row in 0..16 {
-        //     for i in t..t + 3 {
-        //         display.set_pixel(row, (row + i) % 42, true);
-        //     }
-        // }
+        // refresh screen if game did an update
+        let elapsed = Duration::from_millis(10);
 
-        display.fill((t % 2 == 0));
+        // read the input
+        let i = common::Input {
+            left: input_left.is_low().unwrap(),
+            right: input_right.is_low().unwrap(),
+            up: input_up.is_low().unwrap(),
+            down: input_down.is_low().unwrap(),
+            action: input_action.is_low().unwrap(),
+        };
 
-        display.refresh(&mut delay, false);
+        defmt::debug!(
+            "left:{}, right:{}, up:{}, down:{}, action: {}",
+            i.left,
+            i.right,
+            i.up,
+            i.down,
+            i.action
+        );
 
-        delay.delay_ms(500);
-        t += 1;
+        if game.update(elapsed, i, &mut display, &mut rng) {
+            display.refresh(&mut delay, false);
+        }
     }
-    // loop {
-    //     info!("on!");
-    //     led_pin.set_high().unwrap();
+}
 
-    //     // for i in range.clone() {
-    //     //     debug!("High: {}", i);
-    //     //     driver_pins.drive_pixel(1, i, DriveDirection::High, &mut delay, 2000);
-    //     //     delay.delay_ms(100);
-    //     // }
-    //     display.set_pixel(1, 1, true);
-    //     display.refresh(&mut delay, false);
+#[derive(Default)]
+struct RandomSource {
+    count: u32,
+}
 
-    //     delay.delay_ms(1000);
-
-    //     info!("off!");
-    //     led_pin.set_low().unwrap();
-
-    //     // for i in range.clone() {
-    //     //     debug!("Low: {}", i);
-    //     //     driver_pins.drive_pixel(1, i, DriveDirection::Low, &mut delay, 2000);
-    //     //     delay.delay_ms(100);
-    //     // }
-
-    //     display.set_pixel(1, 1, false);
-    //     display.refresh(&mut delay, false);
-
-    //     delay.delay_ms(1000);
-    // }
+impl RandomNumberSource for RandomSource {
+    fn next_u32(&mut self) -> u32 {
+        self.count += 1;
+        self.count
+    }
 }

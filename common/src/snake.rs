@@ -67,7 +67,7 @@ impl<const ROWS: usize, const COLS: usize> SnakeGame<ROWS, COLS> {
         Self {
             state: State::PreStart,
             update_timer: Duration::ZERO,
-            update_rate: Duration::from_millis(100),
+            update_rate: Duration::from_millis(400),
             position_x: COLS as isize / 2,
             position_y: ROWS as isize / 2,
             apple_position_x: 5,
@@ -167,7 +167,6 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
             // check for collision with the apple
             if self.position_x == self.apple_position_x && self.position_y == self.apple_position_y
             {
-
                 self.update_rate =
                     Duration::from_millis(50).max(self.update_rate - Duration::from_millis(10));
                 self.length += 1;
