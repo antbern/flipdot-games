@@ -1,5 +1,7 @@
 # Project template for rp2040-hal
 
+> **NOTE**: This content was part of the starter template back in early 2023. It may contain outdated and outright wrong information. The use of [`probe-run`](https://github.com/knurling-rs/probe-run) has since been [deprecated](https://ferrous-systems.com/blog/probe-run-deprecation/), for example. The file is kept, however, for future reference.
+
 This template is intended as a starting point for developing your own firmware based on the rp2040-hal.
 
 It includes all of the `knurling-rs` tooling as showcased in https://github.com/knurling-rs/app-template (`defmt`, `defmt-rtt`, `panic-probe`, `flip-link`) to make development as easy as possible.
