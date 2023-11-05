@@ -25,7 +25,10 @@ rp-pico = "0.7"
 # rp2040-hal = { version="0.8", features=["rt", "critical-section-impl"] }
 # rp2040-boot2 = "0.2"
 
-common = {path = '../common'}
+common = {workspace = true}
+
+# rand = { version = "0.7", default-features = false }
+
 
 # cargo build/run
 [profile.dev]

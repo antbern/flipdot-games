@@ -1,7 +1,0 @@
-{
-    "rust-analyzer.linkedProjects": [
-        "./common/Cargo.toml",
-        "./pico-firmware/Cargo.toml",
-        "./cli/Cargo.toml",
-    ]
-}

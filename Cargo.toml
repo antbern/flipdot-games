@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "cli",
+    "common",
+    "pico-firmware",
+]
+default-members = ["cli"]
+resolver = "2"
+
+
+[workspace.dependencies]
+common = {path = "./common"}
