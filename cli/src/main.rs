@@ -7,7 +7,7 @@ use std::io::{self, stdout};
 
 use common::display::{Pixel, PixelDisplay};
 use common::snake::SnakeGame;
-use common::{Game, Input, RandomNumberSource, TickerGame};
+use common::{Game, Input, RandomNumberSource};
 use crossterm::event::{
     poll, KeyEventKind, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags,
     PushKeyboardEnhancementFlags,
