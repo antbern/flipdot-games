@@ -7,6 +7,7 @@ use display::PixelDisplay;
 pub mod display;
 pub mod font_monospace;
 pub mod snake;
+pub mod tetris;
 
 /// A struct representing the current state of the input buttons
 #[derive(Default, Clone, Copy, Debug)]

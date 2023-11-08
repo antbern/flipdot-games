@@ -7,6 +7,7 @@ use std::io::{self, stdout};
 
 use common::display::{Pixel, PixelDisplay};
 use common::snake::SnakeGame;
+use common::tetris::TetrisGame;
 use common::{Game, Input, RandomNumberSource};
 use crossterm::event::{
     poll, KeyEventKind, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags,
@@ -94,12 +95,13 @@ impl RandomNumberSource for Random {
     }
 }
 fn print_events() -> io::Result<()> {
-    let mut d: ConsoleDisplay<16, 42> = ConsoleDisplay::new();
+    let mut d: ConsoleDisplay<42, 16> = ConsoleDisplay::new();
     let mut i = Input::default();
     let mut rng = Random { rng: thread_rng() };
 
     //let mut game = TickerGame::new();
-    let mut game: SnakeGame<16, 42> = SnakeGame::new();
+    // let mut game: SnakeGame<42, 16> = SnakeGame::new();
+    let mut game: TetrisGame<42, 16> = TetrisGame::new();
 
     let mut last_frame_time = Instant::now();
     loop {
