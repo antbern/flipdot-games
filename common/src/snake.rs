@@ -13,6 +13,7 @@ pub struct SnakeGame<const ROWS: usize, const COLS: usize> {
     board: [[isize; COLS]; ROWS],
     direction: Direction,
     length: usize,
+    state_wait_timer: Duration,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -75,6 +76,7 @@ impl<const ROWS: usize, const COLS: usize> SnakeGame<ROWS, COLS> {
             board: [[0; COLS]; ROWS],
             direction: Direction::Up,
             length: 0,
+            state_wait_timer: Duration::ZERO,
         }
     }
 
@@ -93,7 +95,13 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
             display.clear();
             display.draw_text(0, 0, "READY");
 
-            if input.action {
+            // delay for starting the game
+            self.state_wait_timer += elapsed;
+
+            if input.action && self.state_wait_timer > Duration::from_millis(1000) {
+                // moving on, reset the timer (for use by the game over state)
+                self.state_wait_timer = Duration::ZERO;
+
                 self.state = State::Running;
             }
             return true;
@@ -103,7 +111,10 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
             display.draw_text(8, 0, "=");
             display.draw_number(8, 10, self.length);
 
-            if input.action {
+            // delay for leaving the game over state
+            self.state_wait_timer += elapsed;
+
+            if input.action && self.state_wait_timer > Duration::from_millis(1000) {
                 *self = SnakeGame::new(); // restart by reinstantiating self ;)
             }
 
