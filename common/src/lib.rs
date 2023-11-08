@@ -56,7 +56,7 @@ impl Game for TickerGame {
         elapsed: Duration,
         input: Input,
         display: &mut impl PixelDisplay,
-        rng: &mut impl RandomNumberSource,
+        _rng: &mut impl RandomNumberSource,
     ) -> bool {
         self.time += elapsed;
 

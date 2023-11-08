@@ -100,6 +100,8 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
         } else if self.state == State::GameOver {
             display.clear();
             display.draw_text(0, 0, "DEAD");
+            display.draw_text(8, 0, "=");
+            display.draw_number(8, 10, self.length);
 
             if input.action {
                 *self = SnakeGame::new(); // restart by reinstantiating self ;)
