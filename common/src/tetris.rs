@@ -51,9 +51,9 @@ impl Type {
     fn pattern(self) -> &'static [(isize, isize); 4] {
         match self {
             Type::Square => &[(0, 0), (0, 1), (1, 0), (1, 1)],
-            Type::L => &[(0, 0), (1, 0), (2, 0), (2, 1)],
-            Type::T => &[(0, 0), (1, 0), (1, 1), (2, 0)],
-            Type::Line => &[(0, 0), (1, 0), (2, 0), (3, 0)],
+            Type::L => &[(-2, 0), (-1, 0), (0, 0), (0, 1)],
+            Type::T => &[(-1, 0), (0, 0), (0, 1), (1, 0)],
+            Type::Line => &[(-1, 0), (0, 0), (1, 0), (2, 0)],
         }
     }
 }
@@ -80,7 +80,6 @@ impl Rotation {
     /// Applies this rotation to a (ROW, COL) tuple
     fn apply(&self, offset: (isize, isize)) -> (isize, isize) {
         match self {
-            // TODO: make sure this is correct... (pen and paper style)
             Rotation::R0 => offset,
             Rotation::R90 => (-offset.1, offset.0),
             Rotation::R180 => (-offset.0, -offset.1),
