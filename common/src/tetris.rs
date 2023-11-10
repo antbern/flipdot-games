@@ -2,7 +2,8 @@ use core::time::Duration;
 
 use crate::{
     display::{Pixel, PixelDisplay},
-    Game, Input, RandomNumberSource,
+    input::Input,
+    Game, RandomNumberSource,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -156,7 +157,7 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
     fn update(
         &mut self,
         elapsed: core::time::Duration,
-        input: crate::Input,
+        input: crate::input::Input,
         display: &mut impl crate::display::PixelDisplay,
         rng: &mut impl RandomNumberSource,
     ) -> bool {
@@ -216,6 +217,8 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
                     t.column += 1;
                 }
             }
+
+            // TODO: check for down and apply the motion there!
         }
 
         if self.update_timer > self.update_rate {

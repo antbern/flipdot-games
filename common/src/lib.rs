@@ -6,18 +6,9 @@ use display::PixelDisplay;
 
 pub mod display;
 pub mod font_monospace;
+pub mod input;
 pub mod snake;
 pub mod tetris;
-
-/// A struct representing the current state of the input buttons
-#[derive(Default, Clone, Copy, Debug)]
-pub struct Input {
-    pub left: bool,
-    pub right: bool,
-    pub up: bool,
-    pub down: bool,
-    pub action: bool,
-}
 
 /// Trait for system-specific generation of a seed for the random number generator
 pub trait RandomNumberSource {
@@ -29,7 +20,7 @@ pub trait Game {
     fn update(
         &mut self,
         elapsed: Duration,
-        input: Input,
+        input: input::Input,
         display: &mut impl PixelDisplay,
         random: &mut impl RandomNumberSource,
     ) -> bool;
@@ -55,7 +46,7 @@ impl Game for TickerGame {
     fn update(
         &mut self,
         elapsed: Duration,
-        input: Input,
+        input: input::Input,
         display: &mut impl PixelDisplay,
         _rng: &mut impl RandomNumberSource,
     ) -> bool {

@@ -1,6 +1,6 @@
 use core::time::Duration;
 
-use crate::{display::Pixel, Game, Input, RandomNumberSource};
+use crate::{display::Pixel, input::Input, Game, RandomNumberSource};
 
 pub struct SnakeGame<const ROWS: usize, const COLS: usize> {
     state: State,
@@ -87,7 +87,7 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
     fn update(
         &mut self,
         elapsed: core::time::Duration,
-        input: crate::Input,
+        input: crate::input::Input,
         display: &mut impl crate::display::PixelDisplay,
         rng: &mut impl RandomNumberSource,
     ) -> bool {

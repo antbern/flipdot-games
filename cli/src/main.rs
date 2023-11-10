@@ -8,7 +8,7 @@ use std::io::{self, stdout};
 use common::display::{Pixel, PixelDisplay};
 use common::snake::SnakeGame;
 use common::tetris::TetrisGame;
-use common::{Game, Input, RandomNumberSource};
+use common::{input::Input, Game, RandomNumberSource};
 use crossterm::event::{
     poll, KeyEventKind, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags,
     PushKeyboardEnhancementFlags,
