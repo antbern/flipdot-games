@@ -87,7 +87,7 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
     fn update(
         &mut self,
         elapsed: core::time::Duration,
-        input: crate::input::Input,
+        input: &impl crate::input::Input,
         display: &mut impl crate::display::PixelDisplay,
         rng: &mut impl RandomNumberSource,
     ) -> bool {
@@ -98,7 +98,7 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
             // delay for starting the game
             self.state_wait_timer += elapsed;
 
-            if input.action && self.state_wait_timer > Duration::from_millis(1000) {
+            if input.action() && self.state_wait_timer > Duration::from_millis(1000) {
                 // moving on, reset the timer (for use by the game over state)
                 self.state_wait_timer = Duration::ZERO;
 
@@ -114,7 +114,7 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
             // delay for leaving the game over state
             self.state_wait_timer += elapsed;
 
-            if input.action && self.state_wait_timer > Duration::from_millis(1000) {
+            if input.action() && self.state_wait_timer > Duration::from_millis(1000) {
                 *self = SnakeGame::new(); // restart by reinstantiating self ;)
             }
 
@@ -123,12 +123,16 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
 
         self.update_timer += elapsed;
 
-        let new_direction = match input {
-            Input { left: true, .. } => Direction::Left,
-            Input { right: true, .. } => Direction::Right,
-            Input { up: true, .. } => Direction::Up,
-            Input { down: true, .. } => Direction::Down,
-            _ => self.direction,
+        let new_direction = if input.left() {
+            Direction::Left
+        } else if input.right() {
+            Direction::Right
+        } else if input.up() {
+            Direction::Up
+        } else if input.down() {
+            Direction::Down
+        } else {
+            self.direction
         };
 
         if !new_direction.is_opposite_to(self.direction) {

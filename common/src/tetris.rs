@@ -157,7 +157,7 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
     fn update(
         &mut self,
         elapsed: core::time::Duration,
-        input: crate::input::Input,
+        input: &impl crate::input::Input,
         display: &mut impl crate::display::PixelDisplay,
         rng: &mut impl RandomNumberSource,
     ) -> bool {
@@ -168,7 +168,7 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
             // delay for starting the game
             self.state_wait_timer += elapsed;
 
-            if input.action && self.state_wait_timer > Duration::from_millis(1000) {
+            if input.action() && self.state_wait_timer > Duration::from_millis(1000) {
                 // moving on, reset the timer (for use by the game over state)
                 self.state_wait_timer = Duration::ZERO;
 
@@ -184,7 +184,7 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
             // delay for leaving the game over state
             self.state_wait_timer += elapsed;
 
-            if input.action && self.state_wait_timer > Duration::from_millis(1000) {
+            if input.action() && self.state_wait_timer > Duration::from_millis(1000) {
                 *self = TetrisGame::new(); // restart by reinstantiating self ;)
             }
 
@@ -196,7 +196,7 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
         // always let the user rotate the block
         if let Some(t) = &mut self.current {
             // TODO: make sure the actions are valid!
-            if input.action {
+            if input.action() {
                 // let new =
                 t.rotation.rotate_right();
                 if !Self::is_valid(t, &self.board) {
@@ -204,14 +204,14 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
                 }
             }
 
-            if input.right {
+            if input.right() {
                 t.column += 1;
                 if !Self::is_valid(t, &self.board) {
                     t.column -= 1;
                 }
             }
 
-            if input.left {
+            if input.left() {
                 t.column -= 1;
                 if !Self::is_valid(t, &self.board) {
                     t.column += 1;

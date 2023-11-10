@@ -20,7 +20,7 @@ pub trait Game {
     fn update(
         &mut self,
         elapsed: Duration,
-        input: input::Input,
+        input: &impl input::Input,
         display: &mut impl PixelDisplay,
         random: &mut impl RandomNumberSource,
     ) -> bool;
@@ -46,7 +46,7 @@ impl Game for TickerGame {
     fn update(
         &mut self,
         elapsed: Duration,
-        input: input::Input,
+        input: &impl input::Input,
         display: &mut impl PixelDisplay,
         _rng: &mut impl RandomNumberSource,
     ) -> bool {
@@ -57,7 +57,7 @@ impl Game for TickerGame {
 
             self.row = (self.row + 1) % display.rows();
 
-            if input.up {
+            if input.up() {
                 self.col = (self.col + 1) % display.columns();
             } else {
                 self.col = self.col.saturating_sub(1);

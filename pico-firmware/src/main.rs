@@ -123,7 +123,7 @@ fn main() -> ! {
         let elapsed = Duration::from_millis(10);
 
         // read the input
-        let i = common::input::Input {
+        let i = common::input::BasicInput {
             left: input_left.is_low().unwrap(),
             right: input_right.is_low().unwrap(),
             up: input_up.is_low().unwrap(),
@@ -140,7 +140,7 @@ fn main() -> ! {
             i.action
         );
 
-        if game.update(elapsed, i, &mut display, &mut rng) {
+        if game.update(elapsed, &i, &mut display, &mut rng) {
             display.refresh(&mut delay, false);
         }
     }
