@@ -11,7 +11,7 @@ const NUMBER_STR_LOOKUP_100: &'static [&'static str] = &[
     "97", "98", "99", "100", ">100",
 ];
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Pixel {
     On,
     Off,

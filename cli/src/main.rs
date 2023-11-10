@@ -40,6 +40,10 @@ impl<const ROWS: usize, const COLS: usize> ConsoleDisplay<ROWS, COLS> {
             buffer: [[Pixel::Off; COLS]; ROWS],
         }
     }
+
+    pub fn changed(&self, other: &Self) -> bool {
+        self.buffer == other.buffer
+    }
 }
 
 impl<const ROWS: usize, const COLS: usize> Display for ConsoleDisplay<ROWS, COLS> {
@@ -96,6 +100,8 @@ impl RandomNumberSource for Random {
 }
 fn print_events() -> io::Result<()> {
     let mut d: ConsoleDisplay<42, 16> = ConsoleDisplay::new();
+    let mut d2: ConsoleDisplay<42, 16> = ConsoleDisplay::new(); // for double buffering
+
     let mut i = Input::default();
     let mut rng = Random { rng: thread_rng() };
 
@@ -135,9 +141,12 @@ fn print_events() -> io::Result<()> {
         if elapsed > Duration::from_millis(10) {
             last_frame_time = current_time;
 
-            // refresh the screen if the game did an update
+            // double buffering to only update if the display actually changed...
 
-            if game.update(elapsed, i, &mut d, &mut rng) {
+            game.update(elapsed, i, &mut d, &mut rng);
+
+            // update display only if concents changed
+            if d.changed(&d2) {
                 execute!(
                     stdout(),
                     terminal::BeginSynchronizedUpdate,
@@ -149,6 +158,9 @@ fn print_events() -> io::Result<()> {
                     terminal::EndSynchronizedUpdate
                 )?;
             }
+
+            // swap the buffers
+            std::mem::swap(&mut d, &mut d2);
         }
     }
 
