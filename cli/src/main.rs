@@ -6,7 +6,7 @@ use std::fmt::Display;
 use std::io::{self, stdout};
 
 use common::display::{Pixel, PixelDisplay};
-use common::input::BasicInput;
+use common::input::{BasicInput, DebouncedInput};
 use common::snake::SnakeGame;
 use common::tetris::TetrisGame;
 use common::{input::Input, Game, RandomNumberSource};
@@ -104,6 +104,7 @@ fn print_events() -> io::Result<()> {
     let mut d2: ConsoleDisplay<42, 16> = ConsoleDisplay::new(); // for double buffering
 
     let mut i = BasicInput::default();
+    let mut i_debounced = DebouncedInput::default();
     let mut rng = Random { rng: thread_rng() };
 
     //let mut game = TickerGame::new();
@@ -143,8 +144,9 @@ fn print_events() -> io::Result<()> {
             last_frame_time = current_time;
 
             // double buffering to only update if the display actually changed...
+            i_debounced.update(&i);
 
-            game.update(elapsed, &i, &mut d, &mut rng);
+            game.update(elapsed, &i_debounced, &mut d, &mut rng);
 
             // update display only if concents changed
             if d.changed(&d2) {
