@@ -1,4 +1,5 @@
 use core::time::Duration;
+use log::debug;
 
 use crate::{
     display::{Pixel, PixelDisplay},
@@ -113,6 +114,15 @@ struct Tetronomicon {
     column: isize,
 }
 impl Tetronomicon {
+    fn new_random(rng: &mut impl RandomNumberSource) -> Self {
+        Self {
+            kind: Type::new_random(rng),
+            rotation: Rotation::new_random(rng),
+            row: -4, // start above the screen
+            column: 8,
+        }
+    }
+
     fn cells(&self) -> impl Iterator<Item = (isize, isize)> {
         // create a clones that can be moved into the map
         let rotation = self.rotation;
@@ -170,6 +180,52 @@ impl<const ROWS: usize, const COLS: usize> TetrisGame<ROWS, COLS> {
 
         true
     }
+
+    /// Move the current block down one row and run all the logic
+    fn move_down(&mut self, rng: &mut impl RandomNumberSource) {
+        if let Some(t) = &mut self.current {
+            t.row += 1;
+
+            // if the new position is not valid, then we collided with the bottom or anything on the board
+            // so copy all the cells to the board!
+            if !Self::is_valid(t, &self.board) {
+                t.row -= 1;
+
+                // if we collided above the top, then game is over
+                if t.row <= 0 {
+                    self.state = State::GameOver;
+                }
+
+                self.score += 1;
+
+                for (row, col) in t.cells() {
+                    if row >= 0 && row < ROWS as isize && col >= 0 && col < COLS as isize {
+                        self.board[row as usize][col as usize] = BoardState::Occupied;
+                    }
+                }
+
+                // run the "fall down" algorithm to remove full rows (start from top)
+                for row in 0..=(ROWS - 1) {
+                    let row_full =
+                        (0..COLS - 1).all(|col| self.board[row][col] == BoardState::Occupied);
+
+                    if !row_full {
+                        continue;
+                    }
+
+                    // row full, move cells down!
+                    for r in (0..=(row - 1)).rev() {
+                        self.board[r + 1] = self.board[r];
+                    }
+
+                    // accumulate points!
+                    self.score += 10;
+                }
+
+                *t = Tetronomicon::new_random(rng);
+            }
+        }
+    }
 }
 
 impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
@@ -216,7 +272,6 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
         if let Some(t) = &mut self.current {
             // TODO: make sure the actions are valid!
             if input.action() {
-                // let new =
                 t.rotation.rotate_right();
                 if !Self::is_valid(t, &self.board) {
                     t.rotation.rotate_left();
@@ -237,45 +292,18 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
                 }
             }
 
-            // TODO: check for down and apply the motion there!
+            if input.down() {
+                self.move_down(rng);
+            }
         }
 
         if self.update_timer > self.update_rate {
             self.update_timer -= self.update_rate;
 
             if self.current.is_none() {
-                self.current = Some(Tetronomicon {
-                    kind: Type::T,
-                    rotation: Rotation::R0,
-                    row: 8,
-                    column: 8,
-                })
+                self.current = Some(Tetronomicon::new_random(rng))
             }
-
-            if let Some(t) = &mut self.current {
-                t.row += 1;
-
-                // if the new position is not valid, then we collided with the bottom or anything on the board
-                // so copy all the cells to the board!
-                if !Self::is_valid(t, &self.board) {
-                    t.row -= 1;
-
-                    for (row, col) in t.cells() {
-                        if row >= 0
-                            && row < display.rows() as isize
-                            && col >= 0
-                            && col < display.columns() as isize
-                        {
-                            self.board[row as usize][col as usize] = BoardState::Occupied;
-                        }
-                    }
-
-                    // TODO: run the "fall down" algorithm to remove full rows (start from bottom)
-
-                    // TODO: randomize new block
-                    t.row = 0;
-                }
-            }
+            self.move_down(rng);
         }
 
         // redraw
