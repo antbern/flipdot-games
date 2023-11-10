@@ -10,3 +10,5 @@ resolver = "2"
 
 [workspace.dependencies]
 common = {path = "./common"}
+
+log = "0.4.20"

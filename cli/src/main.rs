@@ -1,15 +1,15 @@
-//! Demonstrates how to block read events.
-//!
-//! cargo run --example event-read
-
+use chrono::Local;
+use log::{debug, info, warn, Level, LevelFilter, Metadata, Record};
+use std::collections::VecDeque;
 use std::fmt::Display;
 use std::io::{self, stdout};
+use std::sync::Mutex;
 
 use common::display::{Pixel, PixelDisplay};
 use common::input::{BasicInput, DebouncedInput};
 use common::snake::SnakeGame;
 use common::tetris::TetrisGame;
-use common::{input::Input, Game, RandomNumberSource};
+use common::{Game, RandomNumberSource};
 use crossterm::event::{
     poll, KeyEventKind, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags,
     PushKeyboardEnhancementFlags,
@@ -25,9 +25,8 @@ use crossterm::{
 use rand::prelude::*;
 use std::time::{Duration, Instant};
 
-const HELP: &str = r#"Blocking read()
- - Keyboard, mouse, focus and terminal resize events enabled
- - Hit "c" to print current cursor position
+const HELP: &str = r#"
+ - Use WASD + Space to play
  - Use Esc to quit
 "#;
 
@@ -99,9 +98,69 @@ impl RandomNumberSource for Random {
         self.rng.gen()
     }
 }
+
+static CONSOLE_LOGGER: ConsoleLogger = ConsoleLogger {
+    logs: Mutex::new(None),
+    limit: 20,
+};
+
+/// Custom logger to only keep the last 10 lines and show them below the game board
+struct ConsoleLogger {
+    logs: Mutex<Option<VecDeque<String>>>,
+    limit: usize,
+}
+
+impl ConsoleLogger {}
+
+impl log::Log for ConsoleLogger {
+    fn enabled(&self, metadata: &Metadata) -> bool {
+        metadata.level() <= Level::Debug
+    }
+
+    fn log(&self, record: &Record) {
+        if self.enabled(record.metadata()) {
+            let mut logs = self.logs.lock().expect("could not lock the log history");
+
+            if logs.is_none() {
+                *logs = Some(VecDeque::new());
+            }
+
+            if let Some(logs) = logs.as_mut() {
+                let msg = format!(
+                    "{} [{}]: {}",
+                    Local::now().format("%Y-%m-%dT%H:%M:%S"),
+                    record.level(),
+                    record.args()
+                )
+                .replace('\n', "\n\r");
+                logs.push_back(msg);
+                if logs.len() > self.limit {
+                    logs.pop_front();
+                }
+            }
+        }
+    }
+
+    fn flush(&self) {}
+}
+
+impl Display for ConsoleLogger {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut logs = self.logs.lock().expect("could not lock the log history");
+        if let Some(msgs) = logs.as_mut() {
+            for msg in msgs {
+                write!(f, "{}\n\r", msg)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+const ROWS: usize = 42;
+const COLS: usize = 16;
 fn print_events() -> io::Result<()> {
-    let mut d: ConsoleDisplay<42, 16> = ConsoleDisplay::new();
-    let mut d2: ConsoleDisplay<42, 16> = ConsoleDisplay::new(); // for double buffering
+    let mut d: ConsoleDisplay<ROWS, COLS> = ConsoleDisplay::new();
+    let mut d2: ConsoleDisplay<ROWS, COLS> = ConsoleDisplay::new(); // for double buffering
 
     let mut i = BasicInput::default();
     let mut i_debounced = DebouncedInput::default();
@@ -109,7 +168,7 @@ fn print_events() -> io::Result<()> {
 
     //let mut game = TickerGame::new();
     // let mut game: SnakeGame<42, 16> = SnakeGame::new();
-    let mut game: TetrisGame<42, 16> = TetrisGame::new();
+    let mut game: TetrisGame<ROWS, COLS> = TetrisGame::new();
 
     let mut last_frame_time = Instant::now();
     loop {
@@ -158,6 +217,7 @@ fn print_events() -> io::Result<()> {
                     SetForegroundColor(Color::Yellow),
                     Print(&d),
                     SetForegroundColor(Color::White),
+                    Print(&CONSOLE_LOGGER),
                     terminal::EndSynchronizedUpdate
                 )?;
             }
@@ -171,7 +231,13 @@ fn print_events() -> io::Result<()> {
 }
 
 fn main() -> io::Result<()> {
-    println!("{}", HELP);
+    log::set_logger(&CONSOLE_LOGGER).expect("could not setup logger");
+    log::set_max_level(LevelFilter::Debug);
+    info!("{}", HELP);
+
+    //println!("{}", CONSOLE_LOGGER);
+
+    //return Ok(());
 
     enable_raw_mode()?;
 

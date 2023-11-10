@@ -37,6 +37,15 @@ enum Type {
     Line,
 }
 impl Type {
+    fn new_random(rng: &mut impl RandomNumberSource) -> Self {
+        match rng.next_u32() % 4 {
+            0 => Self::Square,
+            1 => Self::L,
+            2 => Self::T,
+            3 => Self::Line,
+            _ => Self::Square,
+        }
+    }
     /// Returns a list of offsets to apply for this type
     fn pattern(self) -> &'static [(isize, isize); 4] {
         match self {
@@ -57,6 +66,16 @@ enum Rotation {
 }
 
 impl Rotation {
+    fn new_random(rng: &mut impl RandomNumberSource) -> Self {
+        match rng.next_u32() % 4 {
+            0 => Self::R0,
+            1 => Self::R90,
+            2 => Self::R180,
+            3 => Self::R270,
+            _ => Self::R0,
+        }
+    }
+
     /// Applies this rotation to a (ROW, COL) tuple
     fn apply(&self, offset: (isize, isize)) -> (isize, isize) {
         match self {
