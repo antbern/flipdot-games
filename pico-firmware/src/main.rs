@@ -18,11 +18,7 @@ use panic_probe as _;
 // Uncomment the BSP you included in Cargo.toml, the rest of the code does not need to change.
 use rp_pico as bsp;
 // use sparkfun_pro_micro_rp2040 as bsp;
-use common::{
-    display::{Pixel, PixelDisplay},
-    snake::SnakeGame,
-    Game, RandomNumberSource,
-};
+use common::{snake::SnakeGame, Game, RandomNumberSource};
 
 use bsp::hal::{
     clocks::{init_clocks_and_plls, Clock},
@@ -127,7 +123,7 @@ fn main() -> ! {
         let elapsed = Duration::from_millis(10);
 
         // read the input
-        let i = common::Input {
+        let i = common::input::BasicInput {
             left: input_left.is_low().unwrap(),
             right: input_right.is_low().unwrap(),
             up: input_up.is_low().unwrap(),
@@ -144,7 +140,7 @@ fn main() -> ! {
             i.action
         );
 
-        if game.update(elapsed, i, &mut display, &mut rng) {
+        if game.update(elapsed, &i, &mut display, &mut rng) {
             display.refresh(&mut delay, false);
         }
     }

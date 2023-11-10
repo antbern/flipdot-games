@@ -11,7 +11,7 @@ const NUMBER_STR_LOOKUP_100: &'static [&'static str] = &[
     "97", "98", "99", "100", ">100",
 ];
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Pixel {
     On,
     Off,
@@ -21,6 +21,7 @@ pub trait PixelDisplay {
     const ROWS: usize;
     const COLUMNS: usize;
 
+    /// Sets the pixel to the desired state
     fn set_pixel(&mut self, row: usize, col: usize, value: Pixel);
 
     fn clear(&mut self) {
