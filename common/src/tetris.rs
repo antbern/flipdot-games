@@ -1,18 +1,24 @@
 use core::time::Duration;
 
-use crate::{display::Pixel, Game, Input, RandomNumberSource};
+use crate::{
+    display::{Pixel, PixelDisplay},
+    Game, Input, RandomNumberSource,
+};
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum BoardState {
+    Free,
+    Occupied,
+}
 pub struct TetrisGame<const ROWS: usize, const COLS: usize> {
     state: State,
     update_timer: Duration,
     update_rate: Duration,
-    position_x: isize,
-    position_y: isize,
-    apple_position_x: isize,
-    apple_position_y: isize,
-    board: [[isize; COLS]; ROWS],
+    board: [[BoardState; COLS]; ROWS],
+
     score: usize,
     state_wait_timer: Duration,
+    current: Option<Tetronomicon>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -22,23 +28,128 @@ enum State {
     GameOver,
 }
 
+#[derive(Copy, Clone, Debug)]
+enum Type {
+    Square,
+    L,
+    T,
+    Line,
+}
+impl Type {
+    /// Returns a list of offsets to apply for this type
+    fn pattern(self) -> &'static [(isize, isize); 4] {
+        match self {
+            Type::Square => &[(0, 0), (0, 1), (1, 0), (1, 1)],
+            Type::L => &[(0, 0), (1, 0), (2, 0), (2, 1)],
+            Type::T => &[(0, 0), (1, 0), (1, 1), (2, 0)],
+            Type::Line => &[(0, 0), (1, 0), (2, 0), (3, 0)],
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Rotation {
+    R0,
+    R90,
+    R180,
+    R270,
+}
+
+impl Rotation {
+    /// Applies this rotation to a (ROW, COL) tuple
+    fn apply(&self, offset: (isize, isize)) -> (isize, isize) {
+        match self {
+            // TODO: make sure this is correct... (pen and paper style)
+            Rotation::R0 => offset,
+            Rotation::R90 => (-offset.1, offset.0),
+            Rotation::R180 => (-offset.0, -offset.1),
+            Rotation::R270 => (offset.1, -offset.0),
+        }
+    }
+
+    fn rotate_right(&mut self) {
+        *self = match self {
+            Rotation::R0 => Self::R90,
+            Rotation::R90 => Self::R180,
+            Rotation::R180 => Self::R270,
+            Rotation::R270 => Self::R0,
+        }
+    }
+
+    fn rotate_left(&mut self) {
+        *self = match self {
+            Rotation::R0 => Self::R270,
+            Rotation::R90 => Self::R0,
+            Rotation::R180 => Self::R90,
+            Rotation::R270 => Self::R180,
+        }
+    }
+}
+
+struct Tetronomicon {
+    kind: Type,
+    rotation: Rotation,
+    row: isize,
+    column: isize,
+}
+impl Tetronomicon {
+    fn cells(&self) -> impl Iterator<Item = (isize, isize)> {
+        // create a clones that can be moved into the map
+        let rotation = self.rotation;
+        let row = self.row;
+        let column = self.column;
+        self.kind
+            .pattern()
+            .iter()
+            .map(move |offset| rotation.apply(*offset))
+            .map(move |(r, c)| (r + row, c + column))
+    }
+}
+
+// fn all_within_bounds<'a, I>(display: &impl crate::display::PixelDisplay, cells: I) -> bool
+// where
+//     I: Iterator<Item = &'a (isize, isize)>,
+// {
+//     if row >= 0
+//                     && row < display.rows() as isize
+//                     && col >= 0
+//                     && col < display.columns() as isize
+//                 {
+// }
+
 impl<const ROWS: usize, const COLS: usize> TetrisGame<ROWS, COLS> {
     pub fn new() -> Self {
         Self {
             state: State::PreStart,
             update_timer: Duration::ZERO,
             update_rate: Duration::from_millis(400),
-            position_x: COLS as isize / 2,
-            position_y: ROWS as isize / 2,
-            apple_position_x: 5,
-            apple_position_y: 5,
-            board: [[0; COLS]; ROWS],
+            board: [[BoardState::Free; COLS]; ROWS],
             score: 0,
             state_wait_timer: Duration::ZERO,
+            current: None,
         }
     }
 
-    fn reset(&mut self) {}
+    // Check if a Tetronomicon does not go outide the edges of the field and not collide with any other occupied cell
+    fn is_valid(t: &Tetronomicon, board: &[[BoardState; COLS]; ROWS]) -> bool {
+        // first make sure all cells are within the bounds
+        for (row, col) in t.cells() {
+            // left right and bottom, not checking the top (since they all start at the top)
+            if row >= ROWS as isize || col < 0 || col >= COLS as isize {
+                return false;
+            }
+        }
+
+        // make sure no parts of the board is occupied
+        for (row, col) in t.cells() {
+            // left right and bottom, not checking the top (since they all start at the top)
+            if row >= 0 && board[row as usize][col as usize] == BoardState::Occupied {
+                return false;
+            }
+        }
+
+        true
+    }
 }
 
 impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
@@ -81,35 +192,94 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
 
         self.update_timer += elapsed;
 
-        if self.update_timer > self.update_rate {
-            self.update_timer -= self.update_rate;
-
-            // redraw
-            display.clear();
-
-            display.set_pixel(
-                self.position_y as usize,
-                self.position_x as usize,
-                Pixel::On,
-            );
-            if self.apple_position_x >= 0 {
-                display.set_pixel(
-                    self.apple_position_y as usize,
-                    self.apple_position_x as usize,
-                    Pixel::On,
-                );
-            }
-            for r in 0..ROWS {
-                for c in 0..COLS {
-                    if self.board[r][c] > 0 {
-                        display.set_pixel(r, c, Pixel::On);
-                    }
+        // always let the user rotate the block
+        if let Some(t) = &mut self.current {
+            // TODO: make sure the actions are valid!
+            if input.action {
+                // let new =
+                t.rotation.rotate_right();
+                if !Self::is_valid(t, &self.board) {
+                    t.rotation.rotate_left();
                 }
             }
 
-            return true;
+            if input.right {
+                t.column += 1;
+                if !Self::is_valid(t, &self.board) {
+                    t.column -= 1;
+                }
+            }
+
+            if input.left {
+                t.column -= 1;
+                if !Self::is_valid(t, &self.board) {
+                    t.column += 1;
+                }
+            }
         }
 
-        false
+        if self.update_timer > self.update_rate {
+            self.update_timer -= self.update_rate;
+
+            if self.current.is_none() {
+                self.current = Some(Tetronomicon {
+                    kind: Type::T,
+                    rotation: Rotation::R0,
+                    row: 8,
+                    column: 8,
+                })
+            }
+
+            if let Some(t) = &mut self.current {
+                t.row += 1;
+
+                // if the new position is not valid, then we collided with the bottom or anything on the board
+                // so copy all the cells to the board!
+                if !Self::is_valid(t, &self.board) {
+                    t.row -= 1;
+
+                    for (row, col) in t.cells() {
+                        if row >= 0
+                            && row < display.rows() as isize
+                            && col >= 0
+                            && col < display.columns() as isize
+                        {
+                            self.board[row as usize][col as usize] = BoardState::Occupied;
+                        }
+                    }
+
+                    // TODO: run the "fall down" algorithm to remove full rows (start from bottom)
+
+                    // TODO: randomize new block
+                    t.row = 0;
+                }
+            }
+        }
+
+        // redraw
+        display.clear();
+
+        for r in 0..ROWS {
+            for c in 0..COLS {
+                if self.board[r][c] == BoardState::Occupied {
+                    display.set_pixel(r, c, Pixel::On);
+                }
+            }
+        }
+
+        // display the tetris block
+        if let Some(t) = &self.current {
+            for (row, col) in t.cells() {
+                if row >= 0
+                    && row < display.rows() as isize
+                    && col >= 0
+                    && col < display.columns() as isize
+                {
+                    display.set_pixel(row as usize, col as usize, Pixel::On);
+                }
+            }
+        }
+
+        true
     }
 }

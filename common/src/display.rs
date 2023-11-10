@@ -21,6 +21,7 @@ pub trait PixelDisplay {
     const ROWS: usize;
     const COLUMNS: usize;
 
+    /// Sets the pixel to the desired state
     fn set_pixel(&mut self, row: usize, col: usize, value: Pixel);
 
     fn clear(&mut self) {
