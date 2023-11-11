@@ -19,7 +19,11 @@ use panic_probe as _;
 use rp_pico as bsp;
 // use sparkfun_pro_micro_rp2040 as bsp;
 use common::{
-    Game, RandomNumberSource, input::DebouncedInput, menu::GameMenu, snake::SnakeGame,
+    Game, RandomNumberSource,
+    display::{PixelDisplay, RotatedDisplay},
+    input::DebouncedInput,
+    menu::GameMenu,
+    snake::SnakeGame,
     tetris::TetrisGame,
 };
 
@@ -100,10 +104,12 @@ fn main() -> ! {
 
     let mut display = Display::<ROWS, COLS>::new(driver_pins);
 
+    let mut display = RotatedDisplay::new(&mut display);
+
     led_pin.set_high().unwrap();
     // do a deep screen refresh (to make sure all pixels are really off)
     display.clear();
-    display.fill(true);
+    display.fill(common::display::Pixel::On);
     display.refresh(&mut delay, true);
     delay.delay_ms(500);
 
@@ -116,8 +122,8 @@ fn main() -> ! {
     led_pin.set_low().unwrap();
 
     let mut games = [
-        &mut TetrisGame::<ROWS, COLS>::new() as &mut dyn Game<_, _, _>,
-        &mut SnakeGame::<ROWS, COLS>::new() as &mut dyn Game<_, _, _>,
+        &mut TetrisGame::new() as &mut dyn Game<COLS, ROWS, _, _, _>,
+        &mut SnakeGame::new() as &mut dyn Game<COLS, ROWS, _, _, _>,
     ];
 
     let mut game = GameMenu::new(&mut games);
