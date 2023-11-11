@@ -42,6 +42,6 @@ https://www.nxp.com/design/microcontrollers-developer-resources/lpc-link2:OM1305
 https://www.nxp.com/part/MCU-LINK#/
 
 ## DAPLink
-You can use DAPLink firmware with any of it's supported chips (LPC4322, LPC11U35, K20, K22, KL26). You'll need to use the 'develop' branch to use GCC to build it. You'll need to find a chip with the correct 
+You can use DAPLink firmware with any of it's supported chips (LPC4322, LPC11U35, K20, K22, KL26). You'll need to use the 'develop' branch to use GCC to build it. You'll need to find a chip with the correct
 
 Firmware source: https://github.com/ARMmbed/DAPLink/tree/develop

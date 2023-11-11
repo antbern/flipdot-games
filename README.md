@@ -61,7 +61,7 @@ to compile and upload the firmware to the device! If you encounter any difficult
 
 ## :books: Resources
 
-Some resources that I found useful 
+Some resources that I found useful
 
 - [ChalmersRobotics/mqtt-flipdot-driver](https://github.com/ChalmersRobotics/mqtt-flipdot-driver) my previous work on interfacing with the flipdot displays.
 
