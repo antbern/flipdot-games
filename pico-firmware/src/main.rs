@@ -140,9 +140,9 @@ fn main() -> ! {
             i.action
         );
 
-        if game.update(elapsed, &i, &mut display, &mut rng) {
-            display.refresh(&mut delay, false);
-        }
+        // the display is already "double buffered" so this repeated calling should be fine!
+        game.update(elapsed, &i, &mut display, &mut rng);
+        display.refresh(&mut delay, false);
     }
 }
 

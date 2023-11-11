@@ -17,13 +17,14 @@ pub trait RandomNumberSource {
 
 pub trait Game {
     /// Runs the logic of the game given the current state of the input and shows it to the display
+    /// Should always draw the current state to the display in immediate-mode like style.
     fn update(
         &mut self,
         elapsed: Duration,
         input: &impl input::Input,
         display: &mut impl PixelDisplay,
         random: &mut impl RandomNumberSource,
-    ) -> bool;
+    );
 }
 
 pub struct TickerGame {
@@ -49,7 +50,7 @@ impl Game for TickerGame {
         input: &impl input::Input,
         display: &mut impl PixelDisplay,
         _rng: &mut impl RandomNumberSource,
-    ) -> bool {
+    ) {
         self.time += elapsed;
 
         if self.time > Duration::from_millis(200) {
@@ -62,14 +63,11 @@ impl Game for TickerGame {
             } else {
                 self.col = self.col.saturating_sub(1);
             }
-
-            display.clear();
-            display.set_pixel(self.row, self.col, display::Pixel::On);
-
-            display.draw_text(0, 0, "HELLO!");
-            return true;
         }
 
-        false
+        display.clear();
+        display.set_pixel(self.row, self.col, display::Pixel::On);
+
+        display.draw_text(0, 0, "HELLO!");
     }
 }

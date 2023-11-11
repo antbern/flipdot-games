@@ -1,6 +1,6 @@
 use core::time::Duration;
 
-use crate::{display::Pixel, input::Input, Game, RandomNumberSource};
+use crate::{display::Pixel, Game, RandomNumberSource};
 
 pub struct SnakeGame<const ROWS: usize, const COLS: usize> {
     state: State,
@@ -79,8 +79,6 @@ impl<const ROWS: usize, const COLS: usize> SnakeGame<ROWS, COLS> {
             state_wait_timer: Duration::ZERO,
         }
     }
-
-    fn reset(&mut self) {}
 }
 
 impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
@@ -90,7 +88,7 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
         input: &impl crate::input::Input,
         display: &mut impl crate::display::PixelDisplay,
         rng: &mut impl RandomNumberSource,
-    ) -> bool {
+    ) {
         if self.state == State::PreStart {
             display.clear();
             display.draw_text(0, 0, "READY");
@@ -104,7 +102,7 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
 
                 self.state = State::Running;
             }
-            return true;
+            return;
         } else if self.state == State::GameOver {
             display.clear();
             display.draw_text(0, 0, "DEAD");
@@ -118,7 +116,7 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
                 *self = SnakeGame::new(); // restart by reinstantiating self ;)
             }
 
-            return true;
+            return;
         } // else continue with the game logic
 
         self.update_timer += elapsed;
@@ -178,7 +176,7 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
                 || self.position_y >= ROWS as isize
             {
                 self.state = State::GameOver;
-                return false;
+                return;
             }
 
             // check for collision with the apple
@@ -195,33 +193,29 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
                 // TODO: CRASH!!!
                 self.state = State::GameOver;
             }
-
-            // redraw
-            display.clear();
-
-            display.set_pixel(
-                self.position_y as usize,
-                self.position_x as usize,
-                Pixel::On,
-            );
-            if self.apple_position_x >= 0 {
-                display.set_pixel(
-                    self.apple_position_y as usize,
-                    self.apple_position_x as usize,
-                    Pixel::On,
-                );
-            }
-            for r in 0..ROWS {
-                for c in 0..COLS {
-                    if self.board[r][c] > 0 {
-                        display.set_pixel(r, c, Pixel::On);
-                    }
-                }
-            }
-
-            return true;
         }
 
-        false
+        // redraw
+        display.clear();
+
+        display.set_pixel(
+            self.position_y as usize,
+            self.position_x as usize,
+            Pixel::On,
+        );
+        if self.apple_position_x >= 0 {
+            display.set_pixel(
+                self.apple_position_y as usize,
+                self.apple_position_x as usize,
+                Pixel::On,
+            );
+        }
+        for r in 0..ROWS {
+            for c in 0..COLS {
+                if self.board[r][c] > 0 {
+                    display.set_pixel(r, c, Pixel::On);
+                }
+            }
+        }
     }
 }

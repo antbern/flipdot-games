@@ -207,7 +207,7 @@ fn print_events() -> io::Result<()> {
 
             game.update(elapsed, &i_debounced, &mut d, &mut rng);
 
-            // update display only if concents changed
+            // update display only if contents changed
             if d.changed(&d2) {
                 execute!(
                     stdout(),
@@ -250,7 +250,7 @@ fn main() -> io::Result<()> {
 
     execute!(stdout, EnterAlternateScreen)?;
     if supports_keyboard_enhancement {
-        println!("Enabling Keyboard Enhancement");
+        info!("Enabling Keyboard Enhancement");
         queue!(
             stdout,
             PushKeyboardEnhancementFlags(
