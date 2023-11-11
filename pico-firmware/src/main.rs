@@ -18,7 +18,10 @@ use panic_probe as _;
 // Uncomment the BSP you included in Cargo.toml, the rest of the code does not need to change.
 use rp_pico as bsp;
 // use sparkfun_pro_micro_rp2040 as bsp;
-use common::{snake::SnakeGame, Game, RandomNumberSource};
+use common::{
+    input::DebouncedInput, menu::GameMenu, snake::SnakeGame, tetris::TetrisGame, Game,
+    RandomNumberSource,
+};
 
 use bsp::hal::{
     clocks::{init_clocks_and_plls, Clock},
@@ -28,6 +31,9 @@ use bsp::hal::{
 };
 
 use crate::driver::Display;
+
+const ROWS: usize = 16;
+const COLS: usize = 42;
 
 #[entry]
 fn main() -> ! {
@@ -92,7 +98,7 @@ fn main() -> ! {
         ],
     };
 
-    let mut display = Display::<16, 42>::new(driver_pins);
+    let mut display = Display::<ROWS, COLS>::new(driver_pins);
 
     led_pin.set_high().unwrap();
     // do a deep screen refresh (to make sure all pixels are really off)
@@ -109,13 +115,20 @@ fn main() -> ! {
 
     led_pin.set_low().unwrap();
 
-    let mut game: SnakeGame<16, 42> = SnakeGame::new();
+    let mut games = [
+        &mut TetrisGame::<ROWS, COLS>::new() as &mut dyn Game<_, _, _>,
+        &mut SnakeGame::<ROWS, COLS>::new() as &mut dyn Game<_, _, _>,
+    ];
+
+    let mut game = GameMenu::new(&mut games);
 
     let input_up = pins.gpio28.into_pull_up_input();
     let input_down = pins.gpio27.into_pull_up_input();
     let input_left = pins.gpio26.into_pull_up_input();
     let input_right = pins.gpio22.into_pull_up_input();
     let input_action = pins.gpio21.into_pull_up_input();
+
+    let mut i_debounced = DebouncedInput::default();
 
     let mut rng = RandomSource::default();
     loop {
@@ -143,8 +156,10 @@ fn main() -> ! {
             i.action
         );
 
+        i_debounced.update(&i);
+
         // the display is already "double buffered" so this repeated calling should be fine!
-        game.update(elapsed, &i, &mut display, &mut rng);
+        game.update(elapsed, &i_debounced, &mut display, &mut rng);
         display.refresh(&mut delay, false);
     }
 }

@@ -1,6 +1,10 @@
 use core::time::Duration;
 
-use crate::{display::Pixel, Game, RandomNumberSource};
+use crate::{
+    display::{Pixel, PixelDisplay},
+    input::Input,
+    Game, RandomNumberSource,
+};
 
 pub struct SnakeGame<const ROWS: usize, const COLS: usize> {
     state: State,
@@ -81,17 +85,14 @@ impl<const ROWS: usize, const COLS: usize> SnakeGame<ROWS, COLS> {
     }
 }
 
-impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
-    fn update(
-        &mut self,
-        elapsed: core::time::Duration,
-        input: &impl crate::input::Input,
-        display: &mut impl crate::display::PixelDisplay,
-        rng: &mut impl RandomNumberSource,
-    ) {
+impl<const ROWS: usize, const COLS: usize, I: Input, D: PixelDisplay, R: RandomNumberSource>
+    Game<I, D, R> for SnakeGame<ROWS, COLS>
+{
+    fn update(&mut self, elapsed: Duration, input: &I, display: &mut D, random: &mut R) {
         if self.state == State::PreStart {
             display.clear();
-            display.draw_text(0, 0, "READY");
+            display.draw_text(0, 0, "RDY");
+            display.draw_text(8, COLS as isize / 2 - 3, "S");
 
             // delay for starting the game
             self.state_wait_timer += elapsed;
@@ -140,8 +141,8 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
         // spawn apple in random position (not on snake itself) if unspecified
         if self.apple_position_x < 0 {
             loop {
-                self.apple_position_x = (rng.next_u32() as usize % COLS) as isize;
-                self.apple_position_y = (rng.next_u32() as usize % ROWS) as isize;
+                self.apple_position_x = (random.next_u32() as usize % COLS) as isize;
+                self.apple_position_y = (random.next_u32() as usize % ROWS) as isize;
 
                 if self.board[self.apple_position_y as usize][self.apple_position_x as usize] == 0 {
                     break;
@@ -216,6 +217,14 @@ impl<const ROWS: usize, const COLS: usize> Game for SnakeGame<ROWS, COLS> {
                     display.set_pixel(r, c, Pixel::On);
                 }
             }
+        }
+    }
+
+    fn state(&self) -> crate::GameState {
+        match self.state {
+            State::PreStart => crate::GameState::Start,
+            State::Running => crate::GameState::Playing,
+            State::GameOver => crate::GameState::GameOver,
         }
     }
 }
