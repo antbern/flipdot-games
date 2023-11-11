@@ -8,6 +8,7 @@ use input::Input;
 pub mod display;
 pub mod font_monospace;
 pub mod input;
+pub mod menu;
 pub mod snake;
 pub mod tetris;
 
@@ -20,6 +21,18 @@ pub trait Game<I: Input, D: PixelDisplay, R: RandomNumberSource> {
     /// Runs the logic of the game given the current state of the input and shows it to the display
     /// Should always draw the current state to the display in immediate-mode like style.
     fn update(&mut self, elapsed: Duration, input: &I, display: &mut D, random: &mut R);
+
+    /// Get the current state of the game
+    fn state(&self) -> GameState {
+        GameState::Start
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GameState {
+    Start,
+    Playing,
+    GameOver,
 }
 
 pub struct TickerGame {

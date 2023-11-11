@@ -1,4 +1,5 @@
 use chrono::Local;
+use common::menu::GameMenu;
 use log::{debug, info, warn, Level, LevelFilter, Metadata, Record};
 use std::collections::VecDeque;
 use std::fmt::Display;
@@ -166,9 +167,12 @@ fn print_events() -> io::Result<()> {
     let mut i_debounced = DebouncedInput::default();
     let mut rng = Random { rng: thread_rng() };
 
-    //let mut game = TickerGame::new();
-    // let mut game: SnakeGame<42, 16> = SnakeGame::new();
-    let mut game: TetrisGame<ROWS, COLS> = TetrisGame::new();
+    let mut games = [
+        &mut TetrisGame::<ROWS, COLS>::new() as &mut dyn Game<_, _, _>,
+        &mut SnakeGame::<ROWS, COLS>::new() as &mut dyn Game<_, _, _>,
+    ];
+
+    let mut game = GameMenu::new(&mut games);
 
     let mut last_frame_time = Instant::now();
     loop {

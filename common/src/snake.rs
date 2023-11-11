@@ -91,7 +91,8 @@ impl<const ROWS: usize, const COLS: usize, I: Input, D: PixelDisplay, R: RandomN
     fn update(&mut self, elapsed: Duration, input: &I, display: &mut D, random: &mut R) {
         if self.state == State::PreStart {
             display.clear();
-            display.draw_text(0, 0, "READY");
+            display.draw_text(0, 0, "RDY");
+            display.draw_text(8, COLS as isize / 2 - 3, "S");
 
             // delay for starting the game
             self.state_wait_timer += elapsed;
@@ -216,6 +217,14 @@ impl<const ROWS: usize, const COLS: usize, I: Input, D: PixelDisplay, R: RandomN
                     display.set_pixel(r, c, Pixel::On);
                 }
             }
+        }
+    }
+
+    fn state(&self) -> crate::GameState {
+        match self.state {
+            State::PreStart => crate::GameState::Start,
+            State::Running => crate::GameState::Playing,
+            State::GameOver => crate::GameState::GameOver,
         }
     }
 }
