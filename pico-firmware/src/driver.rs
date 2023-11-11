@@ -142,12 +142,9 @@ pub struct Display<'a, const ROWS: usize, const COLS: usize> {
     buffer_active: [[bool; COLS]; ROWS],
 }
 
-impl<const ROWS: usize, const COLS: usize> common::display::PixelDisplay
-    for Display<'_, ROWS, COLS>
+impl<'a, const ROWS: usize, const COLS: usize> common::display::PixelDisplay<ROWS, COLS>
+    for Display<'a, ROWS, COLS>
 {
-    const ROWS: usize = ROWS;
-    const COLUMNS: usize = COLS;
-
     fn set_pixel(&mut self, row: usize, col: usize, value: common::display::Pixel) {
         self.set_pixel(
             row,
@@ -172,18 +169,7 @@ impl<'a, const ROWS: usize, const COLS: usize> Display<'a, ROWS, COLS> {
         }
     }
 
-    pub fn clear(&mut self) {
-        self.fill(false);
-    }
-
-    pub fn fill(&mut self, value: bool) {
-        for row in 0..ROWS {
-            for col in 0..COLS {
-                self.buffer_active[row][col] = value;
-            }
-        }
-    }
-
+    #[inline]
     pub fn set_pixel(&mut self, row: usize, col: usize, value: bool) {
         self.buffer_active[row][col] = value;
     }
