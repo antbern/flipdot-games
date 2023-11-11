@@ -99,10 +99,13 @@ fn main() -> ! {
     display.clear();
     display.fill(true);
     display.refresh(&mut delay, true);
+    delay.delay_ms(500);
 
     display.clear();
     display.refresh(&mut delay, true);
+    delay.delay_ms(250);
     display.refresh(&mut delay, true);
+    delay.delay_ms(250);
 
     led_pin.set_low().unwrap();
 
