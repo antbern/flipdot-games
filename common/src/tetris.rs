@@ -227,14 +227,10 @@ impl<const ROWS: usize, const COLS: usize> TetrisGame<ROWS, COLS> {
     }
 }
 
-impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
-    fn update(
-        &mut self,
-        elapsed: core::time::Duration,
-        input: &impl crate::input::Input,
-        display: &mut impl crate::display::PixelDisplay,
-        rng: &mut impl RandomNumberSource,
-    ) {
+impl<const ROWS: usize, const COLS: usize, I: Input, D: PixelDisplay, R: RandomNumberSource>
+    Game<I, D, R> for TetrisGame<ROWS, COLS>
+{
+    fn update(&mut self, elapsed: Duration, input: &I, display: &mut D, random: &mut R) {
         if self.state == State::PreStart {
             display.clear();
             display.draw_text(0, 0, "RDY");
@@ -292,7 +288,7 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
             }
 
             if input.down() {
-                self.move_down(rng);
+                self.move_down(random);
             }
         }
 
@@ -300,9 +296,9 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
             self.update_timer -= self.update_rate;
 
             if self.current.is_none() {
-                self.current = Some(Tetronomicon::new_random(rng))
+                self.current = Some(Tetronomicon::new_random(random))
             }
-            self.move_down(rng);
+            self.move_down(random);
         }
 
         // redraw
