@@ -234,7 +234,7 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
         input: &impl crate::input::Input,
         display: &mut impl crate::display::PixelDisplay,
         rng: &mut impl RandomNumberSource,
-    ) -> bool {
+    ) {
         if self.state == State::PreStart {
             display.clear();
             display.draw_text(0, 0, "RDY");
@@ -248,7 +248,7 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
 
                 self.state = State::Running;
             }
-            return true;
+            return;
         } else if self.state == State::GameOver {
             display.clear();
             display.draw_text(0, 0, "DEAD");
@@ -262,7 +262,7 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
                 *self = TetrisGame::new(); // restart by reinstantiating self ;)
             }
 
-            return true;
+            return;
         } // else continue with the game logic
 
         self.update_timer += elapsed;
@@ -328,7 +328,5 @@ impl<const ROWS: usize, const COLS: usize> Game for TetrisGame<ROWS, COLS> {
                 }
             }
         }
-
-        true
     }
 }
