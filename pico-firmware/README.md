@@ -15,7 +15,7 @@ If you aren't using a debugger (or want to use cargo-embed/probe-rs-debugger), c
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
-  
+
   <summary><h2 style="display: inline-block">Table of Contents</h2></summary>
   <ol>
     <li><a href="#markdown-header-requirements">Requirements</a></li>
@@ -33,7 +33,7 @@ If you aren't using a debugger (or want to use cargo-embed/probe-rs-debugger), c
 <!-- Requirements -->
 <details open="open">
   <summary><h2 style="display: inline-block" id="requirements">Requirements</h2></summary>
-  
+
 - The standard Rust tooling (cargo, rustup) which you can install from https://rustup.rs/
 
 - Toolchain support for the cortex-m0+ processors in the rp2040 (thumbv6m-none-eabi)
@@ -71,7 +71,7 @@ cargo install elf2uf2-rs --locked
 <!-- Running -->
 <details open="open">
   <summary><h2 style="display: inline-block" id="running">Running</h2></summary>
-  
+
 For a debug build
 ```sh
 cargo run
@@ -83,12 +83,12 @@ cargo run --release
 
 If you do not specify a DEFMT_LOG level, it will be set to `debug`.
 That means `println!("")`, `info!("")` and `debug!("")` statements will be printed.
-If you wish to override this, you can change it in `.cargo/config.toml` 
+If you wish to override this, you can change it in `.cargo/config.toml`
 ```toml
 [env]
 DEFMT_LOG = "off"
 ```
-You can also set this inline (on Linux/MacOS)  
+You can also set this inline (on Linux/MacOS)
 ```sh
 DEFMT_LOG=trace cargo run
 ```
@@ -99,7 +99,7 @@ or set the _environment variable_ so that it applies to every `cargo run` call t
 export DEFMT_LOG=trace
 ```
 
-Setting the DEFMT_LOG level for the current session  
+Setting the DEFMT_LOG level for the current session
 for bash
 ```sh
 export DEFMT_LOG=trace
@@ -126,18 +126,18 @@ cargo run
 <details open="open">
   <summary><h2 style="display: inline-block" id="alternative-runners">Alternative runners</h2></summary>
 
-If you don't have a debug probe or if you want to do interactive debugging you can set up an alternative runner for cargo.  
+If you don't have a debug probe or if you want to do interactive debugging you can set up an alternative runner for cargo.
 
 Some of the options for your `runner` are listed below:
 
-* **cargo embed**  
+* **cargo embed**
   *Step 1* - Install [`cargo embed`](https://github.com/probe-rs/probe-rs/blob/master/cargo-embed):
 
   ```console
   $ cargo install --locked cargo-embed
   ```
 
-  *Step 2* - Update settings in [Embed.toml](./Embed.toml)  
+  *Step 2* - Update settings in [Embed.toml](./Embed.toml)
   - The defaults are to flash, reset, and start a defmt logging session
   You can find all the settings and their meanings [in the cargo-embed repo](https://github.com/probe-rs/probe-rs/blob/master/cargo-embed/src/config/default.toml)
 
@@ -166,7 +166,7 @@ Some of the options for your `runner` are listed below:
 
   *Step 5* - Launch a debug session by choosing `Run`>`Start Debugging` (or press F5)
 
-* **probe-rs-cli**  
+* **probe-rs-cli**
   *Step 1* - Install [`probe-rs-cli`](https://crates.io/crates/probe-rs-cli):
 
   ```console
@@ -188,7 +188,7 @@ Some of the options for your `runner` are listed below:
   $ cargo run --release
   ```
 
-* **Loading a UF2 over USB**  
+* **Loading a UF2 over USB**
   *Step 1* - Install [`elf2uf2-rs`](https://github.com/JoNil/elf2uf2-rs):
 
   ```console
@@ -217,7 +217,7 @@ Some of the options for your `runner` are listed below:
   $ cargo run --release
   ```
 
-* **Loading with picotool**  
+* **Loading with picotool**
   As ELF files produced by compiling Rust code are completely compatible with ELF
   files produced by compiling C or C++ code, you can also use the Raspberry Pi
   tool [picotool](https://github.com/raspberrypi/picotool). The only thing to be
