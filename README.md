@@ -1,6 +1,8 @@
 
 # :video_game: flipdot-games
 
+[![Rust](https://github.com/antbern/flipdot-games/actions/workflows/rust.yml/badge.svg)](https://github.com/antbern/flipdot-games/actions/workflows/rust.yml)
+
 Implementation of some game(s) for playing on a classic flipdot display! When [CRF](https://chalmersrobotics.se) recevied these in 2019 I was very excited to use them for something and started investigating. That resulted in the creation of [ChalmersRobotics/mqtt-flipdot-driver](https://github.com/ChalmersRobotics/mqtt-flipdot-driver) which used the built-in controller to put simple text and numbers on the display.
 
 After my growing interest in [Rust](https://www.rust-lang.org/) and a few fascinating YouTube videos (especially [this](https://www.youtube.com/watch?v=8DvH6FiS3sg) by [@bitlunislab](https://www.youtube.com/@bitlunislab)). I came up with the idea of coding some games :video_game:
