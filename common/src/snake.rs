@@ -57,13 +57,10 @@ impl Direction {
     fn is_opposite_to(&self, direction: Direction) -> bool {
         use Direction::*;
 
-        match (*self, direction) {
-            (Up, Down) => true,
-            (Down, Up) => true,
-            (Left, Right) => true,
-            (Right, Left) => true,
-            _ => false,
-        }
+        matches!(
+            (*self, direction),
+            (Up, Down) | (Down, Up) | (Left, Right) | (Right, Left)
+        )
     }
 }
 
@@ -82,6 +79,12 @@ impl<const ROWS: usize, const COLS: usize> SnakeGame<ROWS, COLS> {
             length: 0,
             state_wait_timer: Duration::ZERO,
         }
+    }
+}
+
+impl<const ROWS: usize, const COLS: usize> Default for SnakeGame<ROWS, COLS> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

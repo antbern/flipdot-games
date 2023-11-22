@@ -1,0 +1,56 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build_cli:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+
+    - name: Build
+      run: cargo build --verbose
+
+    - name: Run tests
+      run: cargo test --verbose
+
+    - name: Clippy
+      run: cargo clippy --all-features -- --deny=warnings
+
+    - name: Format
+      run: cargo fmt -- --check
+
+  build_firmware:
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./pico-firmware
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: thumbv6m-none-eabi
+
+    - name: Install flip-link
+      run: cargo install flip-link
+
+    - name: Build
+      run: cargo build --verbose
+
+    - name: Clippy
+      run: cargo clippy --all-features -- --deny=warnings
