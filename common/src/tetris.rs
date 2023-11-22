@@ -1,5 +1,4 @@
 use core::time::Duration;
-use log::debug;
 
 use crate::{
     display::{Pixel, PixelDisplay},
@@ -224,6 +223,12 @@ impl<const ROWS: usize, const COLS: usize> TetrisGame<ROWS, COLS> {
                 *t = Tetronomicon::new_random(rng);
             }
         }
+    }
+}
+
+impl<const ROWS: usize, const COLS: usize> Default for TetrisGame<ROWS, COLS> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

@@ -1,6 +1,6 @@
 use chrono::Local;
 use common::menu::GameMenu;
-use log::{debug, info, warn, Level, LevelFilter, Metadata, Record};
+use log::{info, Level, LevelFilter, Metadata, Record};
 use std::collections::VecDeque;
 use std::fmt::Display;
 use std::io::{self, stdout};

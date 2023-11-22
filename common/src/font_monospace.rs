@@ -12,7 +12,7 @@
 //
 
 pub fn get_bytes_for_char(character: u8) -> &'static [u8] {
-    let start = lut[(character - 0x20) as usize] as usize;
+    let start = LUT[(character - 0x20) as usize] as usize;
 
     &MONOSPACE_6PT[start..start + 9]
 }
@@ -110,7 +110,7 @@ const MONOSPACE_6PT: [u8; 774] = [
     0x00, 0x00, 0x00, 0x00, 0x1E, 0x00, 0x00, 0x00, 0x00, // Character 0x7e (126: '~')
 ];
 
-const lut: [u16; 95] = [
+const LUT: [u16; 95] = [
     0, // Character 0x20 (32: ' ')
     9, // Character 0x21 (33: '!')
     0, 0, 0, 0, 0, 18, // Character 0x27 (39: ''')
