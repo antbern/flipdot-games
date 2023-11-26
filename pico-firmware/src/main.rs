@@ -21,7 +21,7 @@ use rp_pico as bsp;
 use common::{
     Game, RandomNumberSource,
     display::{PixelDisplay, RotatedDisplay},
-    input::DebouncedInput,
+    input::{DebouncedInput, Input, RotatedInput},
     menu::GameMenu,
     snake::SnakeGame,
     tetris::TetrisGame,
@@ -153,13 +153,15 @@ fn main() -> ! {
             action: input_action.is_low().unwrap(),
         };
 
+        let i = RotatedInput::new(&i);
+
         defmt::debug!(
             "left:{}, right:{}, up:{}, down:{}, action: {}",
-            i.left,
-            i.right,
-            i.up,
-            i.down,
-            i.action
+            i.left(),
+            i.right(),
+            i.up(),
+            i.down(),
+            i.action(),
         );
 
         i_debounced.update(&i);

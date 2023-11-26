@@ -1,4 +1,7 @@
-use core::ops::{Deref, DerefMut};
+use core::{
+    fmt::Display,
+    ops::{Deref, DerefMut},
+};
 
 use crate::font_monospace;
 
@@ -100,6 +103,14 @@ pub struct RotatedDisplay<
     D: PixelDisplay<COLUMNS, ROWS>,
 > {
     display: &'a mut D,
+}
+
+impl<'a, const ROWS: usize, const COLUMNS: usize, D: PixelDisplay<COLUMNS, ROWS> + Display> Display
+    for RotatedDisplay<'a, ROWS, COLUMNS, D>
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        self.display.fmt(f)
+    }
 }
 
 impl<'a, const ROWS: usize, const COLUMNS: usize, D: PixelDisplay<COLUMNS, ROWS>>
