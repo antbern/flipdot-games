@@ -88,3 +88,37 @@ impl Input for DebouncedInput {
         self.action
     }
 }
+
+/// An Input that wraps another input to rotate the controls 90 degrees to the left.
+#[derive(Debug)]
+pub struct RotatedInput<'a, I: Input> {
+    _inner: &'a I,
+}
+
+impl<'a, I: Input> Input for RotatedInput<'a, I> {
+    fn left(&self) -> bool {
+        self._inner.down()
+    }
+
+    fn right(&self) -> bool {
+        self._inner.up()
+    }
+
+    fn up(&self) -> bool {
+        self._inner.left()
+    }
+
+    fn down(&self) -> bool {
+        self._inner.right()
+    }
+
+    fn action(&self) -> bool {
+        self._inner.action()
+    }
+}
+
+impl<'a, I: Input> RotatedInput<'a, I> {
+    pub fn new(_inner: &'a I) -> Self {
+        Self { _inner }
+    }
+}
