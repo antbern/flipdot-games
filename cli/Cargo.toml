@@ -9,6 +9,6 @@ edition = "2021"
 common = {workspace = true}
 log = {workspace = true}
 
-crossterm = "0.27.0"
+crossterm = "0.28.1"
 rand = "0.8.5"
 chrono = "0.4.38"
