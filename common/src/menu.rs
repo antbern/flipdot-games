@@ -16,7 +16,7 @@ impl<'a, I: Input, D: PixelDisplay, R: RandomNumberSource> GameMenu<'a, I, D, R>
     }
 }
 
-impl<'a, I: Input, D: PixelDisplay, R: RandomNumberSource> Game<I, D, R> for GameMenu<'a, I, D, R> {
+impl<I: Input, D: PixelDisplay, R: RandomNumberSource> Game<I, D, R> for GameMenu<'_, I, D, R> {
     fn update(&mut self, elapsed: Duration, input: &I, display: &mut D, random: &mut R) {
         // delegate to the currently selected game
         self.games[self.current_index].update(elapsed, input, display, random);
