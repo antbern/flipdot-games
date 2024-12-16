@@ -29,7 +29,7 @@ impl DriveDirection {
     }
 }
 
-impl<'a> Pins<'a> {
+impl Pins<'_> {
     fn set_row_address(&mut self, row: u8) {
         debug_assert!(row < 16); // the lookup table only supports 16 rows for now, although more are supported in hardware
 
@@ -142,8 +142,8 @@ pub struct Display<'a, const ROWS: usize, const COLS: usize> {
     buffer_active: [[bool; COLS]; ROWS],
 }
 
-impl<'a, const ROWS: usize, const COLS: usize> common::display::PixelDisplay
-    for Display<'a, ROWS, COLS>
+impl<const ROWS: usize, const COLS: usize> common::display::PixelDisplay
+    for Display<'_, ROWS, COLS>
 {
     const ROWS: usize = ROWS;
     const COLUMNS: usize = COLS;
