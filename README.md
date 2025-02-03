@@ -10,8 +10,8 @@ After my growing interest in [Rust](https://www.rust-lang.org/) and a few fascin
 The following game(s) are currently implemented / work in progress:
 
 - [x] Snake (quite feature complete, only missing random starting positions on the pico!)
-- [ ] Tetris (wouldn't this be cool!? Well, work-in-progress... feel free to contribute!)
-
+- [x] Tetris (Work-in-progress, but almost playable... feel free to contribute!)
+- [ ] Something like infinite scroller game? Flying through space with random objects moving around?
 
 ## :hammer: Development
 
@@ -19,10 +19,8 @@ To ease development, the project is separated into three crates:
 
 - [`common`](common/): has all the game logic and defines abstractions (`Traits`) that the frontends need to implement.
 - [`cli`](cli/): a command-line version where you can use `wasd` and `space` to control the game in your terminal! Perfect for quick iteration during development :fire:
-- [`pico-firmware`](pico-firmware/): contains firmware for a Raspberry Pico to run the game on the real flipdot display! Since this is Rust, this usually "just works" after using the `cli` for development! Hardware schematics is work-in-progress!
-
-<!-- The hardware (with schematics and pictures) for this is available in the folder [`pico-hardware`](pico-hardware). -->
-
+- [`pico-firmware`](pico-firmware/): contains firmware for a Raspberry Pico to run the game on the real flipdot display! Since this is Rust, this usually "just works" after using the `cli` for development!
+- [`pico-hardware`](pico-hardware/): contains schematics and pinouts for the actual hardware. Shcematic is WIP.
 
 ### Run the CLI
 
