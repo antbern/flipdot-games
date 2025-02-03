@@ -11,7 +11,7 @@ use core::time::Duration;
 use bsp::entry;
 use defmt::*;
 use defmt_rtt as _;
-use embedded_hal::digital::v2::{InputPin, OutputPin};
+use embedded_hal::digital::{InputPin, OutputPin};
 use panic_probe as _;
 
 // Provide an alias for our BSP so we can switch targets quickly.
@@ -122,11 +122,11 @@ fn main() -> ! {
 
     let mut game = GameMenu::new(&mut games);
 
-    let input_up = pins.gpio28.into_pull_up_input();
-    let input_down = pins.gpio27.into_pull_up_input();
-    let input_left = pins.gpio26.into_pull_up_input();
-    let input_right = pins.gpio22.into_pull_up_input();
-    let input_action = pins.gpio21.into_pull_up_input();
+    let mut input_up = pins.gpio28.into_pull_up_input();
+    let mut input_down = pins.gpio27.into_pull_up_input();
+    let mut input_left = pins.gpio26.into_pull_up_input();
+    let mut input_right = pins.gpio22.into_pull_up_input();
+    let mut input_action = pins.gpio21.into_pull_up_input();
 
     let mut i_debounced = DebouncedInput::default();
 

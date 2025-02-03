@@ -1,7 +1,7 @@
 use core::convert::Infallible;
 
 use cortex_m::delay::Delay;
-use embedded_hal::digital::v2::OutputPin;
+use embedded_hal::digital::OutputPin;
 
 /// The number of rows connected to each row and column driver chip.
 const ROW_DRIVER_ROWS: u8 = 16;
