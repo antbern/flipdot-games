@@ -20,7 +20,7 @@ To ease development, the project is separated into three crates:
 - [`common`](common/): has all the game logic and defines abstractions (`Traits`) that the frontends need to implement.
 - [`cli`](cli/): a command-line version where you can use `wasd` and `space` to control the game in your terminal! Perfect for quick iteration during development :fire:
 - [`pico-firmware`](pico-firmware/): contains firmware for a Raspberry Pico to run the game on the real flipdot display! Since this is Rust, this usually "just works" after using the `cli` for development!
-- [`pico-hardware`](pico-hardware/): contains schematics and pinouts for the actual hardware. Shcematic is WIP.
+- [`pico-hardware`](pico-hardware/): contains schematics and pinouts for the actual hardware.
 
 ### Run the CLI
 
@@ -44,10 +44,7 @@ Flashing the firmware to the Pico is a bit more involved. First you need to the 
     cargo install flip-link
     ```
 
-3. Install [`probe-rs`]() used for uploading the firmware to the device. Previously used [`probe-run`](https://github.com/knurling-rs/probe-run) but as of October 2023 it has been [deprecated](https://ferrous-systems.com/blog/probe-run-deprecation/) in favor of `probe-rs`.
-    ```bash
-    cargo install probe-rs --features cli
-    ```
+3. Install [`probe-rs`](https://probe.rs/docs/getting-started/installation/) used for uploading the firmware to the device. Previously used [`probe-run`](https://github.com/knurling-rs/probe-run) but as of October 2023 it has been [deprecated](https://ferrous-systems.com/blog/probe-run-deprecation/) in favor of `probe-rs`.
 
 You also need a compatible debug probe connected to the target Pico to flash.
 You can use a second [Pico as a CMSIS-DAP debug probe](pico-firmware/debug_probes.md#raspberry-pi-pico). Details on other supported debug probes can be found in [pico-firmware/debug_probes.md](pico-firmware/debug_probes.md).
