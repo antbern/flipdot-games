@@ -96,7 +96,7 @@ struct Random {
 
 impl RandomNumberSource for Random {
     fn next_u32(&mut self) -> u32 {
-        self.rng.gen()
+        self.rng.random()
     }
 }
 
@@ -165,7 +165,7 @@ fn print_events() -> io::Result<()> {
 
     let mut i = BasicInput::default();
     let mut i_debounced = DebouncedInput::default();
-    let mut rng = Random { rng: thread_rng() };
+    let mut rng = Random { rng: rand::rng() };
 
     let mut games = [
         &mut TetrisGame::<ROWS, COLS>::new() as &mut dyn Game<_, _, _>,

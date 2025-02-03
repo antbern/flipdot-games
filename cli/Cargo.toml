@@ -10,5 +10,5 @@ common = {workspace = true}
 log = {workspace = true}
 
 crossterm = "0.28.1"
-rand = "0.8.5"
+rand = "0.9.0"
 chrono = "0.4.39"
