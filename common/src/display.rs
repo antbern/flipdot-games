@@ -105,8 +105,8 @@ pub struct RotatedDisplay<
     display: &'a mut D,
 }
 
-impl<'a, const ROWS: usize, const COLUMNS: usize, D: PixelDisplay<COLUMNS, ROWS> + Display> Display
-    for RotatedDisplay<'a, ROWS, COLUMNS, D>
+impl<const ROWS: usize, const COLUMNS: usize, D: PixelDisplay<COLUMNS, ROWS> + Display> Display
+    for RotatedDisplay<'_, ROWS, COLUMNS, D>
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         self.display.fmt(f)

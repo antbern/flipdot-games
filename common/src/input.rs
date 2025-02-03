@@ -95,7 +95,7 @@ pub struct RotatedInput<'a, I: Input> {
     _inner: &'a I,
 }
 
-impl<'a, I: Input> Input for RotatedInput<'a, I> {
+impl<I: Input> Input for RotatedInput<'_, I> {
     fn left(&self) -> bool {
         self._inner.down()
     }
