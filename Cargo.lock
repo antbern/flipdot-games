@@ -578,7 +578,7 @@ dependencies = [
  "cortex-m-rt",
  "defmt",
  "defmt-rtt",
- "embedded-hal 0.2.7",
+ "embedded-hal 1.0.0",
  "panic-probe",
  "rp-pico",
 ]
