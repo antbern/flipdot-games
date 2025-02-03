@@ -1,1 +1,6 @@
 *.jpg
+
+# Some Kicad files / backups that we do not need to commit
+pico-flipdot/pico-flipdot-backups
+*.kicad_prl
+fp-info-cache
