@@ -142,8 +142,8 @@ pub struct Display<'a, const ROWS: usize, const COLS: usize> {
     buffer_active: [[bool; COLS]; ROWS],
 }
 
-impl<'a, const ROWS: usize, const COLS: usize> common::display::PixelDisplay<ROWS, COLS>
-    for Display<'a, ROWS, COLS>
+impl<const ROWS: usize, const COLS: usize> common::display::PixelDisplay<ROWS, COLS>
+    for Display<'_, ROWS, COLS>
 {
     fn set_pixel(&mut self, row: usize, col: usize, value: common::display::Pixel) {
         self.set_pixel(
