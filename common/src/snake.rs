@@ -1,9 +1,9 @@
 use core::time::Duration;
 
 use crate::{
+    Game, RandomNumberSource,
     display::{Pixel, PixelDisplay},
     input::Input,
-    Game, RandomNumberSource,
 };
 
 pub struct SnakeGame<const ROWS: usize, const COLS: usize> {

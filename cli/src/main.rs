@@ -1,6 +1,6 @@
 use chrono::Local;
 use common::menu::GameMenu;
-use log::{info, Level, LevelFilter, Metadata, Record};
+use log::{Level, LevelFilter, Metadata, Record, info};
 use std::collections::VecDeque;
 use std::fmt::Display;
 use std::io::{self, stdout};
@@ -12,14 +12,14 @@ use common::snake::SnakeGame;
 use common::tetris::TetrisGame;
 use common::{Game, RandomNumberSource};
 use crossterm::event::{
-    poll, KeyEventKind, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags,
-    PushKeyboardEnhancementFlags,
+    KeyEventKind, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags,
+    PushKeyboardEnhancementFlags, poll,
 };
 use crossterm::style::{Color, Print, SetForegroundColor};
 use crossterm::terminal::{Clear, EnterAlternateScreen, LeaveAlternateScreen};
 use crossterm::{cursor, terminal};
 use crossterm::{
-    event::{read, Event, KeyCode},
+    event::{Event, KeyCode, read},
     execute, queue,
     terminal::{disable_raw_mode, enable_raw_mode},
 };
