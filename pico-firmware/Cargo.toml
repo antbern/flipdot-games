@@ -1,7 +1,10 @@
 [package]
-edition = "2021"
+edition = "2024"
 name = "pico-firmware"
 version = "0.1.0"
+
+[lints]
+workspace = true
 
 [dependencies]
 cortex-m = "0.7"

@@ -1,9 +1,9 @@
 use core::time::Duration;
 
 use crate::{
+    Game, RandomNumberSource,
     display::{Pixel, PixelDisplay},
     input::Input,
-    Game, RandomNumberSource,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

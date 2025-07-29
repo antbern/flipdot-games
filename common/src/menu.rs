@@ -1,6 +1,6 @@
 use core::time::Duration;
 
-use crate::{display::PixelDisplay, input::Input, Game, GameState, RandomNumberSource};
+use crate::{Game, GameState, RandomNumberSource, display::PixelDisplay, input::Input};
 
 pub struct GameMenu<'a, I: Input, D: PixelDisplay, R: RandomNumberSource> {
     games: &'a mut [&'a mut dyn Game<I, D, R>],

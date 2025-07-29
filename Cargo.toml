@@ -7,6 +7,9 @@ members = [
 default-members = ["cli"]
 resolver = "2"
 
+[workspace.lints.clippy]
+uninlined_format_args = "allow"
+
 
 [workspace.dependencies]
 common = {path = "./common"}
