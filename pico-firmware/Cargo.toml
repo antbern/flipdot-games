@@ -3,6 +3,9 @@ edition = "2021"
 name = "pico-firmware"
 version = "0.1.0"
 
+[lints]
+workspace = true
+
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
