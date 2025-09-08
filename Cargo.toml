@@ -14,4 +14,4 @@ uninlined_format_args = "allow"
 [workspace.dependencies]
 common = {path = "./common"}
 
-log = "0.4.27"
+log = "0.4.28"
