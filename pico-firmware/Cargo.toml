@@ -13,7 +13,7 @@ embedded-hal = { version = "1" }
 
 
 defmt = "1.0.1"
-defmt-rtt = "1.0"
+defmt-rtt = "1.1"
 panic-probe = { version = "1.0", features = ["print-defmt"] }
 
 # We're using a Pico by default on this template
