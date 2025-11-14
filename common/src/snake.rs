@@ -88,8 +88,13 @@ impl<const ROWS: usize, const COLS: usize> Default for SnakeGame<ROWS, COLS> {
     }
 }
 
-impl<const ROWS: usize, const COLS: usize, I: Input, D: PixelDisplay, R: RandomNumberSource>
-    Game<I, D, R> for SnakeGame<ROWS, COLS>
+impl<
+        const ROWS: usize,
+        const COLS: usize,
+        I: Input,
+        D: PixelDisplay<ROWS, COLS>,
+        R: RandomNumberSource,
+    > Game<ROWS, COLS, I, D, R> for SnakeGame<ROWS, COLS>
 {
     fn update(&mut self, elapsed: Duration, input: &I, display: &mut D, random: &mut R) {
         if self.state == State::PreStart {
