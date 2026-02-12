@@ -81,10 +81,7 @@ impl<const ROWS: usize, const COLS: usize> Display for ConsoleDisplay<ROWS, COLS
     }
 }
 
-impl<const ROWS: usize, const COLS: usize> PixelDisplay for ConsoleDisplay<ROWS, COLS> {
-    const ROWS: usize = ROWS;
-    const COLUMNS: usize = COLS;
-
+impl<const ROWS: usize, const COLS: usize> PixelDisplay<ROWS, COLS> for ConsoleDisplay<ROWS, COLS> {
     fn set_pixel(&mut self, row: usize, col: usize, value: Pixel) {
         self.buffer[row][col] = value;
     }
@@ -163,13 +160,18 @@ fn print_events() -> io::Result<()> {
     let mut d: ConsoleDisplay<ROWS, COLS> = ConsoleDisplay::new();
     let mut d2: ConsoleDisplay<ROWS, COLS> = ConsoleDisplay::new(); // for double buffering
 
+    // let mut d = RotatedDisplay::new(&mut d);
+    // let mut d2 = RotatedDisplay::new(&mut d2);
+
     let mut i = BasicInput::default();
     let mut i_debounced = DebouncedInput::default();
     let mut rng = Random { rng: rand::rng() };
 
     let mut games = [
-        &mut TetrisGame::<ROWS, COLS>::new() as &mut dyn Game<_, _, _>,
-        &mut SnakeGame::<ROWS, COLS>::new() as &mut dyn Game<_, _, _>,
+        &mut TetrisGame::new() as &mut dyn Game<ROWS, COLS, _, _, _>,
+        &mut SnakeGame::new() as &mut dyn Game<ROWS, COLS, _, _, _>,
+        // &mut TetrisGame::new() as &mut dyn Game<COLS, ROWS, _, _, _>,
+        // &mut SnakeGame::new() as &mut dyn Game<COLS, ROWS, _, _, _>,
     ];
 
     let mut game = GameMenu::new(&mut games);
@@ -220,6 +222,7 @@ fn print_events() -> io::Result<()> {
                     cursor::MoveTo(0, 0),
                     SetForegroundColor(Color::Yellow),
                     Print(&d),
+                    // Print(&*d),
                     SetForegroundColor(Color::White),
                     Print(&CONSOLE_LOGGER),
                     terminal::EndSynchronizedUpdate

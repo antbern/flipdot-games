@@ -1,3 +1,8 @@
+use core::{
+    fmt::Display,
+    ops::{Deref, DerefMut},
+};
+
 use crate::font_monospace;
 
 /// static lookup table for strings showing the score
@@ -17,10 +22,7 @@ pub enum Pixel {
     Off,
 }
 
-pub trait PixelDisplay {
-    const ROWS: usize;
-    const COLUMNS: usize;
-
+pub trait PixelDisplay<const ROWS: usize, const COLUMNS: usize> {
     /// Sets the pixel to the desired state
     fn set_pixel(&mut self, row: usize, col: usize, value: Pixel);
 
@@ -29,18 +31,18 @@ pub trait PixelDisplay {
     }
 
     fn fill(&mut self, value: Pixel) {
-        for row in 0..Self::ROWS {
-            for col in 0..Self::COLUMNS {
+        for row in 0..ROWS {
+            for col in 0..COLUMNS {
                 self.set_pixel(row, col, value);
             }
         }
     }
 
     fn rows(&self) -> usize {
-        Self::ROWS
+        ROWS
     }
     fn columns(&self) -> usize {
-        Self::COLUMNS
+        COLUMNS
     }
 
     fn draw_text(&mut self, start_row: isize, start_col: isize, text: &str) {
@@ -86,5 +88,80 @@ pub trait PixelDisplay {
         } else {
             self.draw_text(start_row, start_col, NUMBER_STR_LOOKUP_100[number]);
         }
+    }
+
+    // fn rotated<'a>(&'a mut self) -> &mut RotatedDisplay<'a, COLUMNS, ROWS, _> {
+    //     RotatedDisplay::new(self)
+    // }
+}
+
+/// A display that has been rotated 90 degrees
+pub struct RotatedDisplay<
+    'a,
+    const ROWS: usize,
+    const COLUMNS: usize,
+    D: PixelDisplay<COLUMNS, ROWS>,
+> {
+    display: &'a mut D,
+}
+
+impl<const ROWS: usize, const COLUMNS: usize, D: PixelDisplay<COLUMNS, ROWS> + Display> Display
+    for RotatedDisplay<'_, ROWS, COLUMNS, D>
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        self.display.fmt(f)
+    }
+}
+
+impl<'a, const ROWS: usize, const COLUMNS: usize, D: PixelDisplay<COLUMNS, ROWS>>
+    RotatedDisplay<'a, ROWS, COLUMNS, D>
+{
+    pub fn new(display: &'a mut D) -> Self {
+        Self { display }
+    }
+
+    pub fn inner(&self) -> &D {
+        self.display
+    }
+
+    pub fn inner_mut(&mut self) -> &mut D {
+        self.display
+    }
+}
+
+impl<const ROWS: usize, const COLUMNS: usize, D: PixelDisplay<ROWS, COLUMNS>>
+    PixelDisplay<COLUMNS, ROWS> for RotatedDisplay<'_, COLUMNS, ROWS, D>
+{
+    fn set_pixel(&mut self, row: usize, col: usize, value: Pixel) {
+        self.display
+            .set_pixel((ROWS as isize - col as isize - 1) as usize, row, value)
+    }
+
+    fn rows(&self) -> usize {
+        COLUMNS
+    }
+
+    fn columns(&self) -> usize {
+        ROWS
+    }
+}
+
+/// Convenience derive Deref
+impl<const ROWS: usize, const COLUMNS: usize, D: PixelDisplay<COLUMNS, ROWS>> Deref
+    for RotatedDisplay<'_, ROWS, COLUMNS, D>
+{
+    type Target = D;
+
+    fn deref(&self) -> &Self::Target {
+        self.inner()
+    }
+}
+
+/// Convenience derive DerefMut
+impl<const ROWS: usize, const COLUMNS: usize, D: PixelDisplay<COLUMNS, ROWS>> DerefMut
+    for RotatedDisplay<'_, ROWS, COLUMNS, D>
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.inner_mut()
     }
 }
