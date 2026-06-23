@@ -2,13 +2,27 @@ use core::time::Duration;
 
 use crate::{Game, GameState, RandomNumberSource, display::PixelDisplay, input::Input};
 
-pub struct GameMenu<'a, I: Input, D: PixelDisplay, R: RandomNumberSource> {
-    games: &'a mut [&'a mut dyn Game<I, D, R>],
+pub struct GameMenu<
+    'a,
+    const ROWS: usize,
+    const COLS: usize,
+    I: Input,
+    D: PixelDisplay<ROWS, COLS>,
+    R: RandomNumberSource,
+> {
+    games: &'a mut [&'a mut dyn Game<ROWS, COLS, I, D, R>],
     current_index: usize,
 }
-
-impl<'a, I: Input, D: PixelDisplay, R: RandomNumberSource> GameMenu<'a, I, D, R> {
-    pub fn new(games: &'a mut [&'a mut dyn Game<I, D, R>]) -> Self {
+impl<
+        'a,
+        const ROWS: usize,
+        const COLS: usize,
+        I: Input,
+        D: PixelDisplay<ROWS, COLS>,
+        R: RandomNumberSource,
+    > GameMenu<'a, ROWS, COLS, I, D, R>
+{
+    pub fn new(games: &'a mut [&'a mut dyn Game<ROWS, COLS, I, D, R>]) -> Self {
         Self {
             games,
             current_index: 0,
@@ -16,7 +30,14 @@ impl<'a, I: Input, D: PixelDisplay, R: RandomNumberSource> GameMenu<'a, I, D, R>
     }
 }
 
-impl<I: Input, D: PixelDisplay, R: RandomNumberSource> Game<I, D, R> for GameMenu<'_, I, D, R> {
+impl<
+        const ROWS: usize,
+        const COLS: usize,
+        I: Input,
+        D: PixelDisplay<ROWS, COLS>,
+        R: RandomNumberSource,
+    > Game<ROWS, COLS, I, D, R> for GameMenu<'_, ROWS, COLS, I, D, R>
+{
     fn update(&mut self, elapsed: Duration, input: &I, display: &mut D, random: &mut R) {
         // delegate to the currently selected game
         self.games[self.current_index].update(elapsed, input, display, random);
