@@ -17,7 +17,14 @@ pub trait RandomNumberSource {
     fn next_u32(&mut self) -> u32;
 }
 
-pub trait Game<I: Input, D: PixelDisplay, R: RandomNumberSource> {
+pub trait Game<
+    const ROWS: usize,
+    const COLS: usize,
+    I: Input,
+    D: PixelDisplay<ROWS, COLS>,
+    R: RandomNumberSource,
+>
+{
     /// Runs the logic of the game given the current state of the input and shows it to the display
     /// Should always draw the current state to the display in immediate-mode like style.
     fn update(&mut self, elapsed: Duration, input: &I, display: &mut D, random: &mut R);
@@ -57,7 +64,14 @@ impl Default for TickerGame {
     }
 }
 
-impl<I: Input, D: PixelDisplay, R: RandomNumberSource> Game<I, D, R> for TickerGame {
+impl<
+        const ROWS: usize,
+        const COLS: usize,
+        I: Input,
+        D: PixelDisplay<ROWS, COLS>,
+        R: RandomNumberSource,
+    > Game<ROWS, COLS, I, D, R> for TickerGame
+{
     fn update(&mut self, elapsed: Duration, input: &I, display: &mut D, _random: &mut R) {
         self.time += elapsed;
 
